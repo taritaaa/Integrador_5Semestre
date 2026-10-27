@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del modelo - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<h1>Detalle del modelo</h1>
+
+<p><strong>ID:</strong> <span th:text="${vehicleModel.id()}"></span></p>
+<p><strong>Nombre:</strong> <span th:text="${vehicleModel.name()}"></span></p>
+<p><strong>Marca:</strong> <span th:text="${vehicleModel.brand()}"></span></p>
+
+<a th:href="@{/models/{id}/edit(id=${vehicleModel.id()})}">Editar</a>
+<a th:href="@{/models}">Volver al listado</a>
+</body>
+</html>

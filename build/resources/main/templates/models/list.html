@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Modelos - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<h1>Modelos de vehículo</h1>
+
+<p th:if="${successMessage}" th:text="${successMessage}"></p>
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+<a th:href="@{/models/new}">Registrar modelo</a>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Marca</th>
+        <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="m : ${models}">
+        <td th:text="${m.id()}"></td>
+        <td th:text="${m.name()}"></td>
+        <td th:text="${m.brand()}"></td>
+        <td>
+            <a th:href="@{/models/{id}(id=${m.id()})}">Ver</a>
+            <a th:href="@{/models/{id}/edit(id=${m.id()})}">Editar</a>
+            <form th:action="@{/models/{id}(id=${m.id()})}" method="post" style="display:inline">
+                <input type="hidden" name="_method" value="delete">
+                <button type="submit">Eliminar</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

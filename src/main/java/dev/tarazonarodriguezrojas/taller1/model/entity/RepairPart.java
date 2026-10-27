@@ -3,22 +3,18 @@ package dev.tarazonarodriguezrojas.taller1.model.entity;
 import jakarta.persistence.*;
 /**
  * Tabla intermedia entre Repair y Part.
- * Una reparación puede usar muchos repuestos y un repuesto puede
- * usarse en muchas reparaciones (relación muchos a muchos).
- *
- * Según el diagrama, esta tabla solo tiene repair_id y part_id.
- * Falta la columna "quantity" (cantidad usada) que piden RF-21 y RF-25;
- * conviene agregarla al diagrama y a esta clase.
+ * Guarda qué repuestos se usaron en una reparación y en qué cantidad
+ * (RF-21 y RF-25).
  */
 @Entity
 @Table(name = "repair_part")
 public class RepairPart {
-    //CLAVE COMPUESTA: En lugar de tener un atributo simple @Id Integer id;, agrupa los dos IDs necesarios (repairId y partId) dentro del objeto id.
+
+    // Llave primaria compuesta (repair_id + part_id)
     @EmbeddedId
     private RepairPartId id = new RepairPartId();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    //Vincula un campo de la clave compuesta (RepairPartId) con una relación @ManyToOne
     @MapsId("repairId")
     @JoinColumn(name = "repair_id", nullable = false)
     private Repair repair;
@@ -28,12 +24,20 @@ public class RepairPart {
     @JoinColumn(name = "part_id", nullable = false)
     private Part part;
 
+    // Cantidad de unidades del repuesto usadas en la reparación.
+    // El servicio de reparaciones descontará esta cantidad del stock.
+    @Column(name = "quantity", nullable = false)
+    private Integer quantity;
+
     public RepairPart() {
     }
 
-    public RepairPart(Repair repair, Part part) {
+    // La reparación y el repuesto deben estar guardados (tener id)
+    // antes de crear este registro.
+    public RepairPart(Repair repair, Part part, Integer quantity) {
         this.repair = repair;
         this.part = part;
+        this.quantity = quantity;
         this.id = new RepairPartId(repair.getId(), part.getId());
     }
 
@@ -59,5 +63,13 @@ public class RepairPart {
 
     public void setPart(Part part) {
         this.part = part;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 }

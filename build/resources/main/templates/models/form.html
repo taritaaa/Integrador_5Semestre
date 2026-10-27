@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Modelo - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<h1 th:text="${vehicleModel.id() == null} ? 'Registrar modelo' : 'Editar modelo'"></h1>
+
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+<form method="post"
+      th:action="${vehicleModel.id() == null} ? @{/models} : @{/models/{id}(id=${vehicleModel.id()})}">
+    <input type="hidden" name="_method" value="put" th:if="${vehicleModel.id() != null}">
+
+    <label for="name">Nombre</label>
+    <input type="text" id="name" name="name" maxlength="100" required th:value="${vehicleModel.name()}">
+
+    <label for="brand">Marca</label>
+    <input type="text" id="brand" name="brand" maxlength="100" required th:value="${vehicleModel.brand()}">
+
+    <button type="submit">Guardar</button>
+    <a th:href="@{/models}">Cancelar</a>
+</form>
+</body>
+</html>
