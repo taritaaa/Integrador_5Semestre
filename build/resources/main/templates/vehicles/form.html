@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehículo - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<h1 th:text="${vehicle.id() == null} ? 'Registrar vehículo' : 'Editar vehículo'"></h1>
+
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+<p th:if="${models.isEmpty()}">Primero debe registrar un modelo en <a th:href="@{/models/new}">Modelos</a>.</p>
+
+<form method="post"
+      th:action="${vehicle.id() == null} ? @{/vehicles} : @{/vehicles/{id}(id=${vehicle.id()})}">
+    <input type="hidden" name="_method" value="put" th:if="${vehicle.id() != null}">
+
+    <!-- Al registrar, la placa se escribe. Al editar, solo se muestra (no se puede cambiar). -->
+    <div th:if="${vehicle.id() == null}">
+        <label for="licensePlate">Placa</label>
+        <input type="text" id="licensePlate" name="licensePlate" maxlength="7" required
+               placeholder="ABC-123, ABC-12A, R-12345, S-12345, CD-1234"
+               th:value="${vehicle.licensePlate()}">
+        <small>
+            Carro, camión o tractomula: ABC-123 |
+            Moto: ABC-12 o ABC-12A |
+            Remolque: R-12345 |
+            Semirremolque: S-12345 |
+            Diplomático: CC-1234 o CD-1234.
+            Se puede escribir con o sin guion.
+        </small>
+    </div>
+    <div th:if="${vehicle.id() != null}">
+        <p><strong>Placa:</strong> <span th:text="${vehicle.licensePlate()}"></span></p>
+        <input type="hidden" name="licensePlate" th:value="${vehicle.licensePlate()}">
+    </div>
+
+    <label for="plateColor">Color de la placa</label>
+    <select id="plateColor" name="plateColor" required>
+        <option value="">Seleccione</option>
+        <option th:each="c : ${plateColors}" th:value="${c}" th:text="${c}"
+                th:selected="${vehicle.plateColor() == c}"></option>
+    </select>
+
+    <label for="ownerName">Nombre del propietario</label>
+    <input type="text" id="ownerName" name="ownerName" maxlength="100" required
+           th:value="${vehicle.ownerName()}">
+
+    <label for="ownerDocument">Documento del propietario</label>
+    <input type="text" id="ownerDocument" name="ownerDocument" maxlength="20" required
+           th:value="${vehicle.ownerDocument()}">
+
+    <label for="ownerPhone">Teléfono del propietario</label>
+    <input type="text" id="ownerPhone" name="ownerPhone" maxlength="20" required
+           th:value="${vehicle.ownerPhone()}">
+
+    <label for="modelId">Modelo</label>
+    <select id="modelId" name="modelId" required>
+        <option value="">Seleccione</option>
+        <option th:each="m : ${models}" th:value="${m.id()}" th:text="${m.name() + ' - ' + m.brand()}"
+                th:selected="${vehicle.modelId() == m.id()}"></option>
+    </select>
+
+    <button type="submit">Guardar</button>
+    <a th:href="@{/vehicles}">Cancelar</a>
+</form>
+</body>
+</html>

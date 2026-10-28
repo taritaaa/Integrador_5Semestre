@@ -10,13 +10,123 @@
 
 <p>Bienvenido al sistema. Selecciona una opción para comenzar:</p>
 
+<!-- ============ MÓDULOS DISPONIBLES ============ -->
+
+<h2>Catálogo</h2>
+<h3>Modelos de vehículo</h3>
 <ul>
-    <li>
-        <a th:href="@{/models}">Gestión de Modelos de Vehículos</a>
-    </li>
-    <li>
-        <a th:href="@{/models/new}">Registrar Nuevo Modelo</a>
-    </li>
+    <li><a th:href="@{/models}">Listado de modelos</a> (consultar, ver detalle, editar y eliminar)</li>
+    <li><a th:href="@{/models/new}">Registrar nuevo modelo</a></li>
 </ul>
+
+<h2>Vehículos</h2>
+<ul>
+    <li><a th:href="@{/vehicles}">Listado de vehículos</a> (filtrar por placa o propietario, ver detalle, editar y eliminar)</li>
+    <li><a th:href="@{/vehicles/new}">Registrar nuevo vehículo</a></li>
+    <li><a th:href="@{/vehicles/model-by-plate}">Buscar modelo y marca por placa</a></li>
+</ul>
+
+<!-- ============ MÓDULOS PENDIENTES (sin enlace hasta que existan) ============ -->
+
+<h2>Próximamente</h2>
+<ul>
+    <li><strong>Repuestos:</strong> inventario, imagen de referencia y búsqueda de repuestos compatibles con un modelo</li>
+    <li><strong>Reparaciones:</strong> historial, estados, costo total, descuento de stock y ubicación en el mapa</li>
+    <li><strong>Usuarios y acceso:</strong> inicio de sesión, recuperación de contraseña y roles</li>
+</ul>
+
+<!-- ============ MAPA DE AVANCE POR REQUISITO ============ -->
+
+<h2>Avance del proyecto</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Módulo</th>
+        <th>Requisitos</th>
+        <th>Estado</th>
+        <th>Ruta</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Modelos</td>
+        <td>RF-08, RF-09, RF-10, RF-11</td>
+        <td>Listo</td>
+        <td><code>/models</code></td>
+    </tr>
+    <tr>
+        <td>Vehículos</td>
+        <td>RF-12, RF-13, RF-14, RF-15</td>
+        <td>Listo</td>
+        <td><code>/vehicles</code></td>
+    </tr>
+    <tr>
+        <td>Búsqueda de modelo por placa</td>
+        <td>RF-27</td>
+        <td>Listo</td>
+        <td><code>/vehicles/model-by-plate</code></td>
+    </tr>
+    <tr>
+        <td>Repuestos</td>
+        <td>RF-16, RF-17, RF-18, RF-19, RF-20</td>
+        <td>Pendiente</td>
+        <td><code>/parts</code></td>
+    </tr>
+    <tr>
+        <td>Repuestos compatibles con un modelo</td>
+        <td>RF-26</td>
+        <td>Pendiente</td>
+        <td><code>/parts</code></td>
+    </tr>
+    <tr>
+        <td>Reparaciones</td>
+        <td>RF-21, RF-22, RF-23, RF-24</td>
+        <td>Pendiente</td>
+        <td><code>/repairs</code></td>
+    </tr>
+    <tr>
+        <td>Stock automático</td>
+        <td>RF-25</td>
+        <td>Pendiente (va dentro de reparaciones)</td>
+        <td>-</td>
+    </tr>
+    <tr>
+        <td>Ubicación del taller en el mapa</td>
+        <td>RF-28</td>
+        <td>Pendiente</td>
+        <td>-</td>
+    </tr>
+    <tr>
+        <td>Usuarios</td>
+        <td>RF-06, RF-07</td>
+        <td>Pendiente</td>
+        <td><code>/users</code></td>
+    </tr>
+    <tr>
+        <td>Sesión y contraseña</td>
+        <td>RF-01, RF-02, RF-03, RF-04</td>
+        <td>Pendiente</td>
+        <td>-</td>
+    </tr>
+    <tr>
+        <td>Roles y permisos</td>
+        <td>RF-05</td>
+        <td>Pendiente</td>
+        <td>-</td>
+    </tr>
+    <tr>
+        <td>Notificaciones Toast</td>
+        <td>RF-29</td>
+        <td>Pendiente (hoy los mensajes son texto simple)</td>
+        <td>-</td>
+    </tr>
+    <tr>
+        <td>Modo claro y oscuro</td>
+        <td>RF-30</td>
+        <td>Pendiente</td>
+        <td>-</td>
+    </tr>
+    </tbody>
+</table>
 </body>
 </html>
