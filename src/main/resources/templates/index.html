@@ -33,12 +33,19 @@
     <li><a th:href="@{/parts/compatible}">Buscar repuestos compatibles con un modelo</a></li>
 </ul>
 
+<h2>Reparaciones</h2>
+<ul>
+    <li><a th:href="@{/repairs}">Historial de reparaciones</a> (filtrar por placa o estado, ver costo total, editar y eliminar)</li>
+    <li><a th:href="@{/repairs/new}">Registrar nueva reparación</a></li>
+    <li><a th:href="@{/repairs/map}">Mapa de tiendas donde se compraron los repuestos</a></li>
+</ul>
+
 <!-- ============ MÓDULOS PENDIENTES (sin enlace hasta que existan) ============ -->
 
 <h2>Próximamente</h2>
 <ul>
-    <li><strong>Reparaciones:</strong> historial, estados, costo total, descuento de stock y ubicación en el mapa</li>
-    <li><strong>Usuarios y acceso:</strong> inicio de sesión, recuperación de contraseña y roles</li>
+    <li><strong>Usuarios y acceso:</strong> gestión de cuentas, inicio de sesión, recuperación de contraseña y roles</li>
+    <li><strong>Interfaz:</strong> notificaciones Toast y modo claro/oscuro</li>
 </ul>
 
 <!-- ============ MAPA DE AVANCE POR REQUISITO ============ -->
@@ -93,20 +100,20 @@
     <tr>
         <td>Reparaciones</td>
         <td>RF-21, RF-22, RF-23, RF-24</td>
-        <td>Pendiente</td>
+        <td>Listo</td>
         <td><code>/repairs</code></td>
     </tr>
     <tr>
         <td>Stock automático</td>
         <td>RF-25</td>
-        <td>Pendiente (va dentro de reparaciones)</td>
-        <td>-</td>
+        <td>Listo (dentro de reparaciones)</td>
+        <td><code>/repairs</code></td>
     </tr>
     <tr>
-        <td>Ubicación del taller en el mapa</td>
+        <td>Ubicación de la tienda en el mapa</td>
         <td>RF-28</td>
-        <td>Pendiente</td>
-        <td>-</td>
+        <td>Listo</td>
+        <td><code>/repairs/map</code></td>
     </tr>
     <tr>
         <td>Usuarios</td>

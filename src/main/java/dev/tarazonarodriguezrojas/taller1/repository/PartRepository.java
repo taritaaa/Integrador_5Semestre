@@ -1,7 +1,6 @@
 package dev.tarazonarodriguezrojas.taller1.repository;
 
-
-import jakarta.servlet.http.Part;
+import dev.tarazonarodriguezrojas.taller1.model.entity.Part;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

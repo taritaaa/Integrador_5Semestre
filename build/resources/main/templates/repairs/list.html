@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reparaciones - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<h1>Historial de reparaciones</h1>
+
+<p th:if="${successMessage}" th:text="${successMessage}"></p>
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+<a th:href="@{/}">Inicio</a> |
+<a th:href="@{/repairs/new}">Registrar reparación</a> |
+<a th:href="@{/repairs/map}">Mapa de tiendas</a> |
+<a th:href="@{/vehicles}">Vehículos</a>
+
+<!-- RF-22: filtros por placa y por estado -->
+<form method="get" th:action="@{/repairs}">
+    <label for="plate">Placa</label>
+    <input type="text" id="plate" name="plate" th:value="${plate}" placeholder="Ej: ABC, 12A, R-1">
+
+    <label for="status">Estado</label>
+    <select id="status" name="status">
+        <option value="">Todos</option>
+        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
+                th:selected="${selectedStatus != null and selectedStatus == s}"></option>
+    </select>
+
+    <button type="submit">Filtrar</button>
+    <a th:href="@{/repairs}">Limpiar</a>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Fecha</th>
+        <th>Placa</th>
+        <th>Tipo</th>
+        <th>Estado</th>
+        <th>Mecánico</th>
+        <th>Costo total</th>
+        <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="r : ${repairs}">
+        <td th:text="${r.id()}"></td>
+        <td th:text="${r.date()}"></td>
+        <td th:text="${r.licensePlate()}"></td>
+        <td th:text="${r.type()}"></td>
+        <td th:text="${r.status()}"></td>
+        <td th:text="${r.mechanicName()}"></td>
+        <td th:text="${'$ ' + #numbers.formatDecimal(r.totalCost(), 1, 'POINT', 2, 'COMMA')}"></td>
+        <td>
+            <a th:href="@{/repairs/{id}(id=${r.id()})}">Ver</a>
+            <a th:href="@{/repairs/{id}/edit(id=${r.id()})}">Editar</a>
+            <a th:href="@{/repairs/{id}/location(id=${r.id()})}">Ubicación</a>
+            <form th:action="@{/repairs/{id}(id=${r.id()})}" method="post" style="display:inline">
+                <input type="hidden" name="_method" value="delete">
+                <button type="submit">Eliminar</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<p th:if="${repairs.isEmpty()}">No hay reparaciones para mostrar.</p>
+</body>
+</html>

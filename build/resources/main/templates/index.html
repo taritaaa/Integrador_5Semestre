@@ -26,13 +26,26 @@
     <li><a th:href="@{/vehicles/model-by-plate}">Buscar modelo y marca por placa</a></li>
 </ul>
 
+<h2>Repuestos</h2>
+<ul>
+    <li><a th:href="@{/parts}">Listado de repuestos</a> (consultar, ver detalle con imagen, editar y eliminar)</li>
+    <li><a th:href="@{/parts/new}">Registrar nuevo repuesto</a></li>
+    <li><a th:href="@{/parts/compatible}">Buscar repuestos compatibles con un modelo</a></li>
+</ul>
+
+<h2>Reparaciones</h2>
+<ul>
+    <li><a th:href="@{/repairs}">Historial de reparaciones</a> (filtrar por placa o estado, ver costo total, editar y eliminar)</li>
+    <li><a th:href="@{/repairs/new}">Registrar nueva reparación</a></li>
+    <li><a th:href="@{/repairs/map}">Mapa de tiendas donde se compraron los repuestos</a></li>
+</ul>
+
 <!-- ============ MÓDULOS PENDIENTES (sin enlace hasta que existan) ============ -->
 
 <h2>Próximamente</h2>
 <ul>
-    <li><strong>Repuestos:</strong> inventario, imagen de referencia y búsqueda de repuestos compatibles con un modelo</li>
-    <li><strong>Reparaciones:</strong> historial, estados, costo total, descuento de stock y ubicación en el mapa</li>
-    <li><strong>Usuarios y acceso:</strong> inicio de sesión, recuperación de contraseña y roles</li>
+    <li><strong>Usuarios y acceso:</strong> gestión de cuentas, inicio de sesión, recuperación de contraseña y roles</li>
+    <li><strong>Interfaz:</strong> notificaciones Toast y modo claro/oscuro</li>
 </ul>
 
 <!-- ============ MAPA DE AVANCE POR REQUISITO ============ -->
@@ -68,33 +81,39 @@
     </tr>
     <tr>
         <td>Repuestos</td>
-        <td>RF-16, RF-17, RF-18, RF-19, RF-20</td>
-        <td>Pendiente</td>
+        <td>RF-16, RF-17, RF-18, RF-19</td>
+        <td>Listo</td>
         <td><code>/parts</code></td>
+    </tr>
+    <tr>
+        <td>Imagen de referencia del repuesto</td>
+        <td>RF-20</td>
+        <td>Listo</td>
+        <td><code>/parts/{id}</code></td>
     </tr>
     <tr>
         <td>Repuestos compatibles con un modelo</td>
         <td>RF-26</td>
-        <td>Pendiente</td>
-        <td><code>/parts</code></td>
+        <td>Listo</td>
+        <td><code>/parts/compatible</code></td>
     </tr>
     <tr>
         <td>Reparaciones</td>
         <td>RF-21, RF-22, RF-23, RF-24</td>
-        <td>Pendiente</td>
+        <td>Listo</td>
         <td><code>/repairs</code></td>
     </tr>
     <tr>
         <td>Stock automático</td>
         <td>RF-25</td>
-        <td>Pendiente (va dentro de reparaciones)</td>
-        <td>-</td>
+        <td>Listo (dentro de reparaciones)</td>
+        <td><code>/repairs</code></td>
     </tr>
     <tr>
-        <td>Ubicación del taller en el mapa</td>
+        <td>Ubicación de la tienda en el mapa</td>
         <td>RF-28</td>
-        <td>Pendiente</td>
-        <td>-</td>
+        <td>Listo</td>
+        <td><code>/repairs/map</code></td>
     </tr>
     <tr>
         <td>Usuarios</td>

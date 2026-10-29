@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa de tiendas - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+<h1>Mapa de tiendas</h1>
+<p>Tiendas donde se compraron los repuestos de las reparaciones. Haga clic en un punto para ver los datos.</p>
+
+<p th:if="${locations.isEmpty()}">
+    Aún no hay ubicaciones registradas. Se registran desde el detalle de cada reparación.</p>
+
+<div id="map" style="height: 500px;"></div>
+
+<p><a th:href="@{/repairs}">Volver al historial</a></p>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script th:inline="javascript">
+    const locations = /*[[${locations}]]*/ [];
+
+    const map = L.map('map').setView([4.5709, -74.2973], 6);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    const bounds = [];
+    locations.forEach(function (loc) {
+        const popup = document.createElement('div');
+
+        const title = document.createElement('strong');
+        title.textContent = loc.workshopName;
+        popup.appendChild(title);
+
+        const info = document.createElement('div');
+        info.textContent = 'Placa: ' + loc.licensePlate + ' | ' + loc.type + ' | ' + loc.status;
+        popup.appendChild(info);
+
+        const link = document.createElement('a');
+        link.href = '/repairs/' + loc.repairId;
+        link.textContent = 'Ver reparación';
+        popup.appendChild(link);
+
+        L.marker([loc.latitude, loc.longitude]).addTo(map).bindPopup(popup);
+        bounds.push([loc.latitude, loc.longitude]);
+    });
+
+    // Se ajusta el mapa para que se vean todos los puntos
+    if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+    }
+</script>
+</body>
+</html>

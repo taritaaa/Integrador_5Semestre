@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Repuestos compatibles - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<h1>Repuestos compatibles con un modelo</h1>
+
+<form method="get" th:action="@{/parts/compatible}">
+    <label for="modelId">Modelo</label>
+    <select id="modelId" name="modelId" required>
+        <option value="">Seleccione un modelo</option>
+        <option th:each="m : ${models}" th:value="${m.id()}" th:text="${m.name() + ' - ' + m.brand()}"
+                th:selected="${selectedModelId != null and selectedModelId == m.id()}"></option>
+    </select>
+    <button type="submit">Buscar</button>
+</form>
+
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+<div th:if="${searched}">
+    <p th:if="${parts.isEmpty()}">No hay repuestos registrados para este modelo.</p>
+
+    <table th:if="${!parts.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Código de barras</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Detalle</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${parts}">
+            <td th:text="${p.name()}"></td>
+            <td th:text="${p.ean()}"></td>
+            <td th:text="${'$ ' + #numbers.formatDecimal(p.price(), 1, 'POINT', 2, 'COMMA')}"></td>
+            <td>
+                <span th:if="${p.stock() == 0}"><strong>Agotado</strong></span>
+                <span th:if="${p.stock() > 0}" th:text="${p.stock()}"></span>
+            </td>
+            <td><a th:href="@{/parts/{id}(id=${p.id()})}">Ver</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<a th:href="@{/parts}">Volver a repuestos</a>
+</body>
+</html>

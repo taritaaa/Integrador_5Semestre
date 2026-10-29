@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de la reparación - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<h1>Detalle de la reparación</h1>
+
+<p th:if="${successMessage}" th:text="${successMessage}"></p>
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+<p><strong>ID:</strong> <span th:text="${repair.id()}"></span></p>
+<p><strong>Fecha:</strong> <span th:text="${repair.date()}"></span></p>
+<p><strong>Vehículo:</strong>
+    <a th:href="@{/vehicles/{id}(id=${repair.vehicleId()})}" th:text="${repair.licensePlate()}"></a></p>
+<p><strong>Tipo:</strong> <span th:text="${repair.type()}"></span></p>
+<p><strong>Estado:</strong> <span th:text="${repair.status()}"></span></p>
+<p><strong>Mecánico:</strong> <span th:text="${repair.mechanicName()}"></span></p>
+
+<h2>Costos</h2>
+<p><strong>Mano de obra:</strong>
+    <span th:text="${'$ ' + #numbers.formatDecimal(repair.laborCost(), 1, 'POINT', 2, 'COMMA')}"></span></p>
+<div th:if="${repair.partId() != null}">
+    <p><strong>Repuesto:</strong>
+        <a th:href="@{/parts/{id}(id=${repair.partId()})}" th:text="${repair.partName()}"></a></p>
+    <p><strong>Cantidad:</strong> <span th:text="${repair.quantity()}"></span></p>
+    <p><strong>Precio unitario (al momento de usarlo):</strong>
+        <span th:text="${'$ ' + #numbers.formatDecimal(repair.unitPrice(), 1, 'POINT', 2, 'COMMA')}"></span></p>
+</div>
+<p th:if="${repair.partId() == null}">Esta reparación no usó repuestos.</p>
+<p><strong>Costo total:</strong>
+    <span th:text="${'$ ' + #numbers.formatDecimal(repair.totalCost(), 1, 'POINT', 2, 'COMMA')}"></span></p>
+
+<h2>Tienda donde se compró el repuesto</h2>
+<div th:if="${repair.workshopName() != null}">
+    <p><strong>Nombre:</strong> <span th:text="${repair.workshopName()}"></span></p>
+    <p><strong>Coordenadas:</strong>
+        <span th:text="${repair.workshopLatitude() + ', ' + repair.workshopLongitude()}"></span></p>
+</div>
+<p th:if="${repair.workshopName() == null}">Aún no se ha registrado la ubicación.</p>
+
+<p>
+    <a th:href="@{/repairs/{id}/location(id=${repair.id()})}">Registrar ubicación en el mapa</a> |
+    <a th:href="@{/repairs/{id}/edit(id=${repair.id()})}">Editar</a> |
+    <a th:href="@{/repairs}">Volver al historial</a>
+</p>
+</body>
+</html>

@@ -131,6 +131,25 @@ public class PartService {
         fileStorage.delete(oldFile);
         return toDTO(saved);
     }
+    // RF-25: descuenta del stock la cantidad usada en una reparación.
+    // Si no hay stock suficiente, lanza IllegalStateException y la reparación no se registra.
+    public void decreaseStock(Integer partId, Integer quantity)
+            throws EntityNotFoundException, IllegalStateException {
+        Part part = findEntity(partId);
+        if (part.getStock() < quantity) {
+            throw new IllegalStateException("Stock insuficiente del repuesto " + part.getName()
+                    + ": hay " + part.getStock() + " y se necesitan " + quantity);
+        }
+        part.setStock(part.getStock() - quantity);
+        repository.save(part);
+    }
+
+    // RF-25: devuelve al stock la cantidad de una reparación cancelada o eliminada
+    public void restoreStock(Integer partId, Integer quantity) throws EntityNotFoundException {
+        Part part = findEntity(partId);
+        part.setStock(part.getStock() + quantity);
+        repository.save(part);
+    }
 
     private Part findEntity(Integer partId) {
         return repository.findById(partId)
