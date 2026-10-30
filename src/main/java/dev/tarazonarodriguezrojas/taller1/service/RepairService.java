@@ -16,6 +16,7 @@ import dev.tarazonarodriguezrojas.taller1.repository.RepairRepository;
 import dev.tarazonarodriguezrojas.taller1.repository.UserRepository;
 import dev.tarazonarodriguezrojas.taller1.repository.VehicleRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,6 +73,17 @@ public class RepairService {
         return userRepository.findByRoleAndActiveTrue(Role.MECHANIC).stream()
                 .map(u -> new MechanicDTO(u.getId(), u.getName()))
                 .toList();
+    }
+
+    // RF-23: el mecánico solo puede modificar las reparaciones que tiene asignadas;
+    // el administrador puede modificar cualquiera.
+    @Transactional(readOnly = true)
+    public void assertCanModify(Integer repairId, String requesterEmail, boolean isAdmin)
+            throws EntityNotFoundException, AccessDeniedException {
+        Repair repair = findEntity(repairId);
+        if (!isAdmin && !repair.getMechanic().getEmail().equalsIgnoreCase(requesterEmail)) {
+            throw new AccessDeniedException("Solo puede modificar las reparaciones que tiene asignadas");
+        }
     }
 
     // RF-21 y RF-25: registrar reparación. Si usa un repuesto, valida compatibilidad y stock
@@ -141,7 +153,7 @@ public class RepairService {
 
     // RF-23 y RF-25: actualizar tipo, estado y costo de mano de obra.
     // Si la reparación pasa a CANCELLED, se devuelve el stock; si sale de CANCELLED, se vuelve a descontar.
-    // Pendiente (RF-05): el mecánico solo podrá modificar las reparaciones que tiene asignadas.
+    // (La restricción "el mecánico solo modifica las suyas" se valida antes con assertCanModify.)
     public RepairDTO updateRepair(Integer repairId, RepairDTO request)
             throws EntityNotFoundException, IllegalArgumentException, IllegalStateException {
         Repair repair = findEntity(repairId);

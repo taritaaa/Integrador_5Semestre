@@ -6,6 +6,7 @@ import dev.tarazonarodriguezrojas.taller1.service.PartService;
 import dev.tarazonarodriguezrojas.taller1.service.RepairService;
 import dev.tarazonarodriguezrojas.taller1.service.VehicleService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,8 +24,8 @@ import java.time.LocalDate;
 /**
  * Pantallas de reparaciones (RF-21 a RF-24) y ubicación de la tienda en el mapa (RF-28).
  * El descuento y la devolución de stock (RF-25) ocurren dentro del service.
- * Registrar, consultar y actualizar: administrador y mecánico (el mecánico solo las asignadas).
- * Eliminar: solo administrador. Esas restricciones por rol llegan con la seguridad (RF-05).
+ * Registrar, consultar y actualizar: administrador y mecánico (el mecánico solo las que tiene asignadas).
+ * Eliminar: solo administrador (ver SecurityConfig).
  */
 @Controller
 @RequestMapping("/repairs")
@@ -81,11 +82,14 @@ public class RepairController {
         }
     }
 
-    // RF-23: formulario con los datos actuales para editar
+    // RF-23: formulario con los datos actuales para editar.
+    // El mecánico solo puede editar las reparaciones que tiene asignadas.
     @GetMapping("/{id}/edit")
     public String getEditRepairTemplate(@PathVariable Integer id, Model model,
+                                        Authentication authentication,
                                         RedirectAttributes redirectAttributes) {
         try {
+            service.assertCanModify(id, authentication.getName(), isAdmin(authentication));
             model.addAttribute("repair", service.findRepairById(id));
             loadFormData(model);
             return "repairs/form";
@@ -116,8 +120,10 @@ public class RepairController {
     // RF-23 y RF-25: actualizar (el formulario envía _method=put)
     @PutMapping("/{id}")
     public String updateRepair(@PathVariable Integer id, @ModelAttribute RepairDTO request,
-                               Model model, RedirectAttributes redirectAttributes) {
+                               Model model, Authentication authentication,
+                               RedirectAttributes redirectAttributes) {
         try {
+            service.assertCanModify(id, authentication.getName(), isAdmin(authentication));
             service.updateRepair(id, request);
             redirectAttributes.addFlashAttribute("successMessage", "Reparación actualizada correctamente");
             return "redirect:/repairs";
@@ -138,7 +144,7 @@ public class RepairController {
         }
     }
 
-    // RF-24: eliminar (el formulario envía _method=delete)
+    // RF-24: eliminar (el formulario envía _method=delete). Solo administrador.
     @DeleteMapping("/{id}")
     public String deleteRepair(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
@@ -195,5 +201,11 @@ public class RepairController {
         model.addAttribute("mechanics", service.findMechanics());
         model.addAttribute("parts", partService.findAllParts());
         model.addAttribute("statuses", RepairStatus.values());
+    }
+
+    // ¿El usuario que hace la petición es administrador?
+    private boolean isAdmin(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 }

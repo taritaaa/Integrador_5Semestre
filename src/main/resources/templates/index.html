@@ -1,50 +1,62 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Inicio - Taller</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
 </head>
 <body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
 <h1>Sistema de Gestión del Taller</h1>
 
-<p>Bienvenido al sistema. Selecciona una opción para comenzar:</p>
+<p>Bienvenido, <strong sec:authentication="name"></strong>.
+    Su rol: <strong sec:authorize="hasRole('ADMIN')">Administrador</strong><strong sec:authorize="hasRole('MECHANIC')">Mecánico</strong>.
+    Selecciona una opción para comenzar:</p>
 
 <!-- ============ MÓDULOS DISPONIBLES ============ -->
 
 <h2>Catálogo</h2>
 <h3>Modelos de vehículo</h3>
 <ul>
-    <li><a th:href="@{/models}">Listado de modelos</a> (consultar, ver detalle, editar y eliminar)</li>
-    <li><a th:href="@{/models/new}">Registrar nuevo modelo</a></li>
+    <li><a th:href="@{/models}">Listado de modelos</a> (consultar y ver detalle<span sec:authorize="hasRole('ADMIN')">, editar y eliminar</span>)</li>
+    <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/models/new}">Registrar nuevo modelo</a></li>
 </ul>
 
 <h2>Vehículos</h2>
 <ul>
-    <li><a th:href="@{/vehicles}">Listado de vehículos</a> (filtrar por placa o propietario, ver detalle, editar y eliminar)</li>
+    <li><a th:href="@{/vehicles}">Listado de vehículos</a> (filtrar por placa o propietario, ver detalle, editar<span sec:authorize="hasRole('ADMIN')"> y eliminar</span>)</li>
     <li><a th:href="@{/vehicles/new}">Registrar nuevo vehículo</a></li>
     <li><a th:href="@{/vehicles/model-by-plate}">Buscar modelo y marca por placa</a></li>
 </ul>
 
 <h2>Repuestos</h2>
 <ul>
-    <li><a th:href="@{/parts}">Listado de repuestos</a> (consultar, ver detalle con imagen, editar y eliminar)</li>
-    <li><a th:href="@{/parts/new}">Registrar nuevo repuesto</a></li>
+    <li><a th:href="@{/parts}">Listado de repuestos</a> (consultar y ver detalle con imagen<span sec:authorize="hasRole('ADMIN')">, editar y eliminar</span>)</li>
+    <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/parts/new}">Registrar nuevo repuesto</a></li>
     <li><a th:href="@{/parts/compatible}">Buscar repuestos compatibles con un modelo</a></li>
 </ul>
 
 <h2>Reparaciones</h2>
 <ul>
-    <li><a th:href="@{/repairs}">Historial de reparaciones</a> (filtrar por placa o estado, ver costo total, editar y eliminar)</li>
+    <li><a th:href="@{/repairs}">Historial de reparaciones</a> (filtrar por placa o estado, ver costo total, editar<span sec:authorize="hasRole('ADMIN')"> y eliminar</span>)</li>
     <li><a th:href="@{/repairs/new}">Registrar nueva reparación</a></li>
     <li><a th:href="@{/repairs/map}">Mapa de tiendas donde se compraron los repuestos</a></li>
 </ul>
+
+<div sec:authorize="hasRole('ADMIN')">
+    <h2>Usuarios</h2>
+    <ul>
+        <li><a th:href="@{/users}">Listado de usuarios</a> (consultar, editar y desactivar cuentas)</li>
+        <li><a th:href="@{/users/new}">Registrar nuevo usuario</a></li>
+    </ul>
+</div>
 
 <!-- ============ MÓDULOS PENDIENTES (sin enlace hasta que existan) ============ -->
 
 <h2>Próximamente</h2>
 <ul>
-    <li><strong>Usuarios y acceso:</strong> gestión de cuentas, inicio de sesión, recuperación de contraseña y roles</li>
     <li><strong>Interfaz:</strong> notificaciones Toast y modo claro/oscuro</li>
 </ul>
 
@@ -61,90 +73,21 @@
     </tr>
     </thead>
     <tbody>
-    <tr>
-        <td>Modelos</td>
-        <td>RF-08, RF-09, RF-10, RF-11</td>
-        <td>Listo</td>
-        <td><code>/models</code></td>
-    </tr>
-    <tr>
-        <td>Vehículos</td>
-        <td>RF-12, RF-13, RF-14, RF-15</td>
-        <td>Listo</td>
-        <td><code>/vehicles</code></td>
-    </tr>
-    <tr>
-        <td>Búsqueda de modelo por placa</td>
-        <td>RF-27</td>
-        <td>Listo</td>
-        <td><code>/vehicles/model-by-plate</code></td>
-    </tr>
-    <tr>
-        <td>Repuestos</td>
-        <td>RF-16, RF-17, RF-18, RF-19</td>
-        <td>Listo</td>
-        <td><code>/parts</code></td>
-    </tr>
-    <tr>
-        <td>Imagen de referencia del repuesto</td>
-        <td>RF-20</td>
-        <td>Listo</td>
-        <td><code>/parts/{id}</code></td>
-    </tr>
-    <tr>
-        <td>Repuestos compatibles con un modelo</td>
-        <td>RF-26</td>
-        <td>Listo</td>
-        <td><code>/parts/compatible</code></td>
-    </tr>
-    <tr>
-        <td>Reparaciones</td>
-        <td>RF-21, RF-22, RF-23, RF-24</td>
-        <td>Listo</td>
-        <td><code>/repairs</code></td>
-    </tr>
-    <tr>
-        <td>Stock automático</td>
-        <td>RF-25</td>
-        <td>Listo (dentro de reparaciones)</td>
-        <td><code>/repairs</code></td>
-    </tr>
-    <tr>
-        <td>Ubicación de la tienda en el mapa</td>
-        <td>RF-28</td>
-        <td>Listo</td>
-        <td><code>/repairs/map</code></td>
-    </tr>
-    <tr>
-        <td>Usuarios</td>
-        <td>RF-06, RF-07</td>
-        <td>Pendiente</td>
-        <td><code>/users</code></td>
-    </tr>
-    <tr>
-        <td>Sesión y contraseña</td>
-        <td>RF-01, RF-02, RF-03, RF-04</td>
-        <td>Pendiente</td>
-        <td>-</td>
-    </tr>
-    <tr>
-        <td>Roles y permisos</td>
-        <td>RF-05</td>
-        <td>Pendiente</td>
-        <td>-</td>
-    </tr>
-    <tr>
-        <td>Notificaciones Toast</td>
-        <td>RF-29</td>
-        <td>Pendiente (hoy los mensajes son texto simple)</td>
-        <td>-</td>
-    </tr>
-    <tr>
-        <td>Modo claro y oscuro</td>
-        <td>RF-30</td>
-        <td>Pendiente</td>
-        <td>-</td>
-    </tr>
+    <tr><td>Sesión: iniciar y cerrar</td><td>RF-01, RF-02</td><td>Listo</td><td><code>/login</code></td></tr>
+    <tr><td>Recuperar y restablecer contraseña</td><td>RF-03, RF-04</td><td>Listo</td><td><code>/forgot-password</code></td></tr>
+    <tr><td>Control de acceso por rol</td><td>RF-05</td><td>Listo</td><td>-</td></tr>
+    <tr><td>Usuarios</td><td>RF-06, RF-07</td><td>Listo</td><td><code>/users</code></td></tr>
+    <tr><td>Modelos</td><td>RF-08, RF-09, RF-10, RF-11</td><td>Listo</td><td><code>/models</code></td></tr>
+    <tr><td>Vehículos</td><td>RF-12, RF-13, RF-14, RF-15</td><td>Listo</td><td><code>/vehicles</code></td></tr>
+    <tr><td>Repuestos</td><td>RF-16, RF-17, RF-18, RF-19</td><td>Listo</td><td><code>/parts</code></td></tr>
+    <tr><td>Imagen de referencia del repuesto</td><td>RF-20</td><td>Listo</td><td><code>/parts/{id}</code></td></tr>
+    <tr><td>Reparaciones</td><td>RF-21, RF-22, RF-23, RF-24</td><td>Listo</td><td><code>/repairs</code></td></tr>
+    <tr><td>Stock automático</td><td>RF-25</td><td>Listo (dentro de reparaciones)</td><td><code>/repairs</code></td></tr>
+    <tr><td>Repuestos compatibles con un modelo</td><td>RF-26</td><td>Listo</td><td><code>/parts/compatible</code></td></tr>
+    <tr><td>Búsqueda de modelo por placa</td><td>RF-27</td><td>Listo</td><td><code>/vehicles/model-by-plate</code></td></tr>
+    <tr><td>Ubicación de la tienda en el mapa</td><td>RF-28</td><td>Listo</td><td><code>/repairs/map</code></td></tr>
+    <tr><td>Notificaciones Toast</td><td>RF-29</td><td>Pendiente (hoy los mensajes son texto simple)</td><td>-</td></tr>
+    <tr><td>Modo claro y oscuro</td><td>RF-30</td><td>Pendiente</td><td>-</td></tr>
     </tbody>
 </table>
 </body>

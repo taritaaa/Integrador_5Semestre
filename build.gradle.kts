@@ -23,6 +23,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
+    // Seguridad: inicio de sesión, roles y contraseñas cifradas (RF-01 a RF-05)
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
+
+    // Envío de correos para recuperar la contraseña (RF-03)
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     // Database

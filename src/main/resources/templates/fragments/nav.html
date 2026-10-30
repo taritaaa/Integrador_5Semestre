@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<!-- Barra de navegación común. Se incluye en cada página con:
+     <div th:replace="~{fragments/nav :: nav}"></div> -->
+<nav th:fragment="nav">
+    <a th:href="@{/}">Inicio</a> |
+    <a th:href="@{/models}">Modelos</a> |
+    <a th:href="@{/vehicles}">Vehículos</a> |
+    <a th:href="@{/parts}">Repuestos</a> |
+    <a th:href="@{/repairs}">Reparaciones</a>
+    <span sec:authorize="hasRole('ADMIN')"> | <a th:href="@{/users}">Usuarios</a></span>
+    <span style="float:right">
+        <span sec:authentication="name"></span>
+        <!-- RF-02: cierre de sesión seguro (POST con token CSRF) -->
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit">Cerrar sesión</button>
+        </form>
+    </span>
+    <hr>
+</nav>
+</body>
+</html>
