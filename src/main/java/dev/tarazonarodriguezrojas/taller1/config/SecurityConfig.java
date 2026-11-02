@@ -15,15 +15,13 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 
 /**
  * Seguridad de la aplicación (RF-01, RF-02 y RF-05).
- *
  * - Inicio de sesión con correo y contraseña; cierre de sesión por POST /logout.
  * - Las contraseñas se guardan cifradas con BCrypt.
  * - Administrador: acceso total y único que registra/edita modelos y repuestos, elimina registros
  *   y gestiona usuarios.
  * - Mecánico: consulta modelos y repuestos, registra y actualiza vehículos y reparaciones,
  *   y usa las búsquedas. No elimina ni gestiona usuarios.
- *
- * Las reglas se evalúan en orden: la primera que coincide es la que se aplica.
+ * - Las reglas se evalúan en orden: la primera que coincide es la que se aplica.
  */
 @Configuration
 @EnableWebSecurity
@@ -36,10 +34,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // Páginas públicas: login, recuperación de contraseña y errores
-                        .requestMatchers(antMatcher("/login"), antMatcher("/forgot-password"),
-                                antMatcher("/reset-password"), antMatcher("/access-denied"),
-                                antMatcher("/error")).permitAll()
+                        // Páginas públicas: login, recuperación de contraseña, errores y archivos estáticos
+                        .requestMatchers(
+                                antMatcher("/login"),
+                                antMatcher("/forgot-password"),
+                                antMatcher("/reset-password"),
+                                antMatcher("/access-denied"),
+                                antMatcher("/error"),
+                                antMatcher("/css/**"),
+                                antMatcher("/js/**")).permitAll()
 
                         // Solo administrador: usuarios y consola de la base de datos
                         .requestMatchers(antMatcher("/users/**"), antMatcher("/h2-console/**")).hasRole(ADMIN)

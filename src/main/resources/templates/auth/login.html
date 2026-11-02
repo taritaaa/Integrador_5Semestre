@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
 </head>
 <body>
+<div th:replace="~{fragments/ui :: ui}"></div>
 <h1>Iniciar sesión</h1>
 
 <p th:if="${param.error}">Correo o contraseña incorrectos, o la cuenta está desactivada.</p>

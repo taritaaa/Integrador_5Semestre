@@ -1,0 +1,5 @@
+.gradle/
+build/
+.idea/
+uploads/
+src/main/resources/application-local.properties

@@ -5,6 +5,9 @@
 <!-- Barra de navegación común. Se incluye en cada página con:
      <div th:replace="~{fragments/nav :: nav}"></div> -->
 <nav th:fragment="nav">
+    <!-- RF-29 y RF-30: Toast y modo claro/oscuro en todas las páginas con menú -->
+    <div th:replace="~{fragments/ui :: ui}"></div>
+
     <a th:href="@{/}">Inicio</a> |
     <a th:href="@{/models}">Modelos</a> |
     <a th:href="@{/vehicles}">Vehículos</a> |
