@@ -1,17 +1,20 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Modelos - Taller</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
 </head>
 <body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
 <h1>Modelos de vehículo</h1>
 
 <p th:if="${successMessage}" th:text="${successMessage}"></p>
 <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
 
-<a th:href="@{/models/new}">Registrar modelo</a>
+<a sec:authorize="hasRole('ADMIN')" th:href="@{/models/new}">Registrar modelo</a>
 
 <table>
     <thead>
@@ -19,6 +22,8 @@
         <th>ID</th>
         <th>Nombre</th>
         <th>Marca</th>
+        <th>Tipo de vehículo</th>
+        <th>Servicio</th>
         <th>Acciones</th>
     </tr>
     </thead>
@@ -27,13 +32,17 @@
         <td th:text="${m.id()}"></td>
         <td th:text="${m.name()}"></td>
         <td th:text="${m.brand()}"></td>
+        <td th:text="${m.vehicleTypeLabel()}"></td>
+        <td th:text="${m.serviceTypeLabel()}"></td>
         <td>
             <a th:href="@{/models/{id}(id=${m.id()})}">Ver</a>
-            <a th:href="@{/models/{id}/edit(id=${m.id()})}">Editar</a>
-            <form th:action="@{/models/{id}(id=${m.id()})}" method="post" style="display:inline">
-                <input type="hidden" name="_method" value="delete">
-                <button type="submit">Eliminar</button>
-            </form>
+            <span sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/models/{id}/edit(id=${m.id()})}">Editar</a>
+                    <form th:action="@{/models/{id}(id=${m.id()})}" method="post" style="display:inline">
+                        <input type="hidden" name="_method" value="delete">
+                        <button type="submit">Eliminar</button>
+                    </form>
+                </span>
         </td>
     </tr>
     </tbody>

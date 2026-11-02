@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscar modelo por placa - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<h1>Buscar modelo por placa</h1>
+
+<form method="get" th:action="@{/vehicles/model-by-plate}">
+    <label for="plate">Placa</label>
+    <input type="text" id="plate" name="plate" maxlength="7" required th:value="${plate}"
+           placeholder="ABC-123, ABC-12A, R-12345, S-12345, CD-1234">
+    <small>
+        Carro, camión o tractomula: ABC-123 |
+        Moto: ABC-12 o ABC-12A |
+        Remolque: R-12345 |
+        Semirremolque: S-12345 |
+        Diplomático: CC-1234 o CD-1234.
+        Se puede escribir con o sin guion.
+    </small>
+    <button type="submit">Buscar</button>
+</form>
+
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+<div th:if="${result}">
+    <p><strong>Placa:</strong> <span th:text="${result.licensePlate()}"></span></p>
+    <p><strong>Tipo de placa:</strong> <span th:text="${result.plateType()}"></span></p>
+    <p><strong>Modelo:</strong> <span th:text="${result.modelName()}"></span></p>
+    <p><strong>Marca:</strong> <span th:text="${result.brand()}"></span></p>
+</div>
+
+<a th:href="@{/vehicles}">Volver a vehículos</a>
+</body>
+</html>

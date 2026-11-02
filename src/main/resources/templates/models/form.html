@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
 </head>
 <body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
 <h1 th:text="${vehicleModel.id() == null} ? 'Registrar modelo' : 'Editar modelo'"></h1>
 
 <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
@@ -19,6 +21,22 @@
 
     <label for="brand">Marca</label>
     <input type="text" id="brand" name="brand" maxlength="100" required th:value="${vehicleModel.brand()}">
+
+    <label for="vehicleType">Tipo de vehículo</label>
+    <select id="vehicleType" name="vehicleType" required>
+        <option value="">Seleccione</option>
+        <option th:each="t : ${vehicleTypes}" th:value="${t}" th:text="${t.label()}"
+                th:selected="${vehicleModel.vehicleType() == t}"></option>
+    </select>
+
+    <label for="serviceType">Tipo de servicio</label>
+    <select id="serviceType" name="serviceType" required>
+        <option value="">Seleccione</option>
+        <option th:each="s : ${serviceTypes}" th:value="${s}" th:text="${s.label()}"
+                th:selected="${vehicleModel.serviceType() == s}"></option>
+    </select>
+
+    <small>Con el tipo de vehículo y el servicio, al registrar un vehículo de este modelo se le indica el formato de placa que le corresponde.</small>
 
     <button type="submit">Guardar</button>
     <a th:href="@{/models}">Cancelar</a>

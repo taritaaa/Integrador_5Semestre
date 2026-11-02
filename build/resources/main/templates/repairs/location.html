@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ubicación de la tienda - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+<h1>Ubicación de la tienda</h1>
+<p>Reparación <strong th:text="${'#' + repair.id() + ' - ' + repair.licensePlate()}"></strong>:
+    marque en el mapa dónde se compró el repuesto.</p>
+
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+<form method="post" th:action="@{/repairs/{id}/location(id=${repair.id()})}">
+    <input type="hidden" name="_method" value="put">
+
+    <label for="workshopName">Nombre de la tienda</label>
+    <input type="text" id="workshopName" name="workshopName" maxlength="100" required
+           th:value="${repair.workshopName()}">
+
+    <input type="hidden" id="latitude" name="latitude" th:value="${repair.workshopLatitude()}">
+    <input type="hidden" id="longitude" name="longitude" th:value="${repair.workshopLongitude()}">
+
+    <p>Haga clic en el mapa para marcar el punto. Punto elegido: <strong id="selected">ninguno</strong></p>
+    <div id="map" style="height: 400px;"></div>
+
+    <button type="submit">Guardar ubicación</button>
+    <a th:href="@{/repairs/{id}(id=${repair.id()})}">Cancelar</a>
+</form>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script th:inline="javascript">
+    const savedLat = /*[[${repair.workshopLatitude()}]]*/ null;
+    const savedLng = /*[[${repair.workshopLongitude()}]]*/ null;
+    const hasPoint = savedLat !== null && savedLng !== null;
+
+    // Si ya hay un punto se centra ahí; si no, se muestra Colombia completa
+    const map = L.map('map').setView(hasPoint ? [savedLat, savedLng] : [4.5709, -74.2973], hasPoint ? 15 : 6);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    let marker = null;
+
+    function setPoint(lat, lng) {
+        if (marker === null) {
+            marker = L.marker([lat, lng]).addTo(map);
+        } else {
+            marker.setLatLng([lat, lng]);
+        }
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+        document.getElementById('selected').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
+    }
+
+    if (hasPoint) {
+        setPoint(savedLat, savedLng);
+    }
+
+    map.on('click', function (e) {
+        setPoint(e.latlng.lat, e.latlng.lng);
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del repuesto - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<h1>Detalle del repuesto</h1>
+
+<p th:if="${successMessage}" th:text="${successMessage}"></p>
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+<p><strong>ID:</strong> <span th:text="${part.id()}"></span></p>
+<p><strong>Nombre:</strong> <span th:text="${part.name()}"></span></p>
+<p><strong>Descripción:</strong> <span th:text="${part.description() != null} ? ${part.description()} : 'Sin descripción'"></span></p>
+<p><strong>Precio:</strong> <span th:text="${'$ ' + #numbers.formatDecimal(part.price(), 1, 'POINT', 2, 'COMMA')}"></span></p>
+<p><strong>Código de barras:</strong> <span th:text="${part.ean()}"></span></p>
+<p>
+    <strong>Stock:</strong>
+    <span th:if="${part.stock() == 0}">Agotado</span>
+    <span th:if="${part.stock() > 0}" th:text="${part.stock()}"></span>
+</p>
+<p><strong>Modelo compatible:</strong> <span th:text="${part.modelName() + ' - ' + part.modelBrand()}"></span></p>
+
+<h2>Imagen de referencia</h2>
+<div th:if="${part.imageUrl() != null}">
+    <img th:src="@{'/part-images/' + ${part.imageUrl()}}" th:alt="${part.name()}" style="max-width:300px">
+</div>
+<p th:if="${part.imageUrl() == null}">Este repuesto aún no tiene imagen.</p>
+
+<!-- RF-20: adjuntar o reemplazar la imagen -->
+<form method="post" enctype="multipart/form-data" th:action="@{/parts/{id}/image(id=${part.id()})}">
+    <label for="image" th:text="${part.imageUrl() == null} ? 'Adjuntar imagen' : 'Reemplazar imagen'"></label>
+    <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/webp" required>
+    <small>JPG, PNG o WEBP, máximo 2 MB.</small>
+    <button type="submit">Subir imagen</button>
+</form>
+
+<p>
+    <a th:href="@{/parts/{id}/edit(id=${part.id()})}">Editar</a>
+    <a th:href="@{/parts}">Volver al listado</a>
+</p>
+</body>
+</html>

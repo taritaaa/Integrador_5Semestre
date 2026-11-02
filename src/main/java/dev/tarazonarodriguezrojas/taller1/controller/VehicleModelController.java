@@ -1,17 +1,25 @@
 package dev.tarazonarodriguezrojas.taller1.controller;
 
+import dev.tarazonarodriguezrojas.taller1.model.constant.ServiceType;
+import dev.tarazonarodriguezrojas.taller1.model.constant.VehicleType;
 import dev.tarazonarodriguezrojas.taller1.model.dto.VehicleModelDTO;
 import dev.tarazonarodriguezrojas.taller1.service.VehicleModelService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Pantallas de modelos de vehículo (RF-08 a RF-11).
- * Consultar: administrador y mecánico. Registrar, actualizar y eliminar: solo administrador.
- * Esa restricción por rol (RF-05) se aplicará cuando se agregue la seguridad.
+ * Consultar: administrador y mecánico. Registrar, actualizar y eliminar: solo administrador
+ * (la restricción por rol está en SecurityConfig).
  */
 @Controller
 @RequestMapping("/models")
@@ -33,7 +41,8 @@ public class VehicleModelController {
     // RF-08: formulario vacío para registrar
     @GetMapping("/new")
     public String getNewModelTemplate(Model model) {
-        model.addAttribute("vehicleModel", new VehicleModelDTO(null, "", ""));
+        model.addAttribute("vehicleModel", new VehicleModelDTO(null, "", "", null, null));
+        loadFormData(model);
         return "models/form";
     }
 
@@ -56,6 +65,7 @@ public class VehicleModelController {
                                        RedirectAttributes redirectAttributes) {
         try {
             model.addAttribute("vehicleModel", service.findModelById(id));
+            loadFormData(model);
             return "models/form";
         } catch (EntityNotFoundException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -76,6 +86,7 @@ public class VehicleModelController {
             // Se vuelve al formulario conservando lo que escribió el usuario
             model.addAttribute("vehicleModel", request);
             model.addAttribute("errorMessage", e.getMessage());
+            loadFormData(model);
             return "models/form";
         }
     }
@@ -93,8 +104,10 @@ public class VehicleModelController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/models";
         } catch (IllegalArgumentException e) {
-            model.addAttribute("vehicleModel", new VehicleModelDTO(id, request.name(), request.brand()));
+            model.addAttribute("vehicleModel", new VehicleModelDTO(id, request.name(), request.brand(),
+                    request.vehicleType(), request.serviceType()));
             model.addAttribute("errorMessage", e.getMessage());
+            loadFormData(model);
             return "models/form";
         }
     }
@@ -109,5 +122,11 @@ public class VehicleModelController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/models";
+    }
+
+    // Datos que necesita el formulario: tipos de vehículo y tipos de servicio
+    private void loadFormData(Model model) {
+        model.addAttribute("vehicleTypes", VehicleType.values());
+        model.addAttribute("serviceTypes", ServiceType.values());
     }
 }

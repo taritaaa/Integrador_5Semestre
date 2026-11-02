@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehículo - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<h1 th:text="${vehicle.id() == null} ? 'Registrar vehículo' : 'Editar vehículo'"></h1>
+
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+<p th:if="${models.isEmpty()}">Primero debe registrar un modelo en <a th:href="@{/models}">Modelos</a>.</p>
+
+<form method="post"
+      th:action="${vehicle.id() == null} ? @{/vehicles} : @{/vehicles/{id}(id=${vehicle.id()})}">
+    <input type="hidden" name="_method" value="put" th:if="${vehicle.id() != null}">
+
+    <!-- El modelo va primero: su tipo de vehículo y de servicio definen cómo es la placa -->
+    <label for="modelId">Modelo</label>
+    <select id="modelId" name="modelId" required>
+        <option value="">Seleccione</option>
+        <option th:each="m : ${models}" th:value="${m.id()}"
+                th:text="${m.name() + ' - ' + m.brand() + ' (' + m.vehicleTypeLabel() + ', ' + m.serviceTypeLabel() + ')'}"
+                th:attr="data-example=${m.plateExample()},data-format=${m.plateFormat()},data-color=${m.suggestedPlateColor()}"
+                th:selected="${vehicle.modelId() == m.id()}"></option>
+    </select>
+
+    <!-- Al registrar, la placa se escribe. Al editar, solo se muestra (no se puede cambiar). -->
+    <div th:if="${vehicle.id() == null}">
+        <label for="licensePlate">Placa</label>
+        <input type="text" id="licensePlate" name="licensePlate" maxlength="7" required
+               placeholder="Seleccione primero el modelo"
+               th:value="${vehicle.licensePlate()}">
+    </div>
+    <div th:if="${vehicle.id() != null}">
+        <p><strong>Placa:</strong> <span th:text="${vehicle.licensePlate()}"></span></p>
+        <input type="hidden" name="licensePlate" th:value="${vehicle.licensePlate()}">
+    </div>
+    <small id="plateHelp">Seleccione primero el modelo: según su tipo se indica el formato de la placa.</small>
+    <label for="plateColor">Color de la placa</label>
+    <select id="plateColor" name="plateColor" required>
+        <option value="">Seleccione</option>
+        <option th:each="c : ${plateColors}" th:value="${c}" th:text="${c}"
+                th:selected="${vehicle.plateColor() == c}"></option>
+    </select>
+
+    <label for="ownerName">Nombre del propietario</label>
+    <input type="text" id="ownerName" name="ownerName" maxlength="100" required
+           th:value="${vehicle.ownerName()}">
+
+    <label for="ownerDocument">Documento del propietario</label>
+    <input type="text" id="ownerDocument" name="ownerDocument" maxlength="20" required
+           th:value="${vehicle.ownerDocument()}">
+
+    <label for="ownerPhone">Teléfono del propietario</label>
+    <input type="text" id="ownerPhone" name="ownerPhone" maxlength="20" required
+           th:value="${vehicle.ownerPhone()}">
+
+    <button type="submit">Guardar</button>
+    <a th:href="@{/vehicles}">Cancelar</a>
+</form>
+
+<script>
+    // Guía de placa: según el modelo elegido muestra el formato, pone el ejemplo en el campo
+    // y sugiere el color de la placa (amarilla = público, blanca = particular).
+    (function () {
+        var model = document.getElementById('modelId');
+        var plate = document.getElementById('licensePlate');
+        var color = document.getElementById('plateColor');
+        var help = document.getElementById('plateHelp');
+        if (!model || !help) {
+            return;
+        }
+
+        function update(changedByUser) {
+            var option = model.options[model.selectedIndex];
+            var example = option ? option.getAttribute('data-example') : null;
+            if (!example) {
+                return;
+            }
+
+                help.textContent = 'Formato de placa para este modelo: ' + option.getAttribute('data-format')
+                + (plate ? '. Puede escribirla con o sin guion.' : '.');
+            if (plate) {
+                plate.placeholder = example;
+            }
+            // El color solo se sugiere cuando el usuario cambia el modelo (no pisa lo ya guardado)
+            var suggested = option.getAttribute('data-color');
+            if (changedByUser && suggested && color) {
+                color.value = suggested;
+            }
+        }
+
+        model.addEventListener('change', function () { update(true); });
+        if (plate) {
+            plate.addEventListener('input', function () { plate.value = plate.value.toUpperCase(); });
+        }
+        update(false);
+    })();
+</script>
+</body>
+</html>

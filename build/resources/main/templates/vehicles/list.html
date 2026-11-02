@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehículos - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<h1>Vehículos</h1>
+
+<p th:if="${successMessage}" th:text="${successMessage}"></p>
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+<a th:href="@{/vehicles/new}">Registrar vehículo</a> |
+<a th:href="@{/vehicles/model-by-plate}">Buscar modelo por placa</a> |
+<a th:href="@{/models}">Modelos</a>
+
+<!-- RF-13: filtros por placa y propietario -->
+<form method="get" th:action="@{/vehicles}">
+    <label for="plate">Placa</label>
+    <input type="text" id="plate" name="plate" th:value="${plate}" placeholder="Ej: ABC, 12A, R-1">
+
+    <label for="owner">Propietario</label>
+    <input type="text" id="owner" name="owner" th:value="${owner}">
+
+    <button type="submit">Filtrar</button>
+    <a th:href="@{/vehicles}">Limpiar</a>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Placa</th>
+        <th>Color de placa</th>
+        <th>Propietario</th>
+        <th>Modelo</th>
+        <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="v : ${vehicles}">
+        <td th:text="${v.id()}"></td>
+        <td th:text="${v.licensePlate()}"></td>
+        <td th:text="${v.plateColor()}"></td>
+        <td th:text="${v.ownerName()}"></td>
+        <td th:text="${v.modelName() + ' - ' + v.modelBrand()}"></td>
+        <td>
+            <a th:href="@{/vehicles/{id}(id=${v.id()})}">Ver</a>
+            <a th:href="@{/vehicles/{id}/edit(id=${v.id()})}">Editar</a>
+            <form th:action="@{/vehicles/{id}(id=${v.id()})}" method="post" style="display:inline">
+                <input type="hidden" name="_method" value="delete">
+                <button type="submit">Eliminar</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

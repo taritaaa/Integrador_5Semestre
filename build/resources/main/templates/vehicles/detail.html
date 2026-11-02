@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del vehículo - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+<h1>Detalle del vehículo</h1>
+
+<p><strong>ID:</strong> <span th:text="${vehicle.id()}"></span></p>
+<p><strong>Placa:</strong> <span th:text="${vehicle.licensePlate()}"></span></p>
+<p><strong>Color de placa:</strong> <span th:text="${vehicle.plateColor()}"></span></p>
+<p><strong>Propietario:</strong> <span th:text="${vehicle.ownerName()}"></span></p>
+<p><strong>Documento:</strong> <span th:text="${vehicle.ownerDocument()}"></span></p>
+<p><strong>Teléfono:</strong> <span th:text="${vehicle.ownerPhone()}"></span></p>
+<p><strong>Modelo:</strong> <span th:text="${vehicle.modelName()}"></span></p>
+<p><strong>Marca:</strong> <span th:text="${vehicle.modelBrand()}"></span></p>
+
+<a th:href="@{/vehicles/{id}/edit(id=${vehicle.id()})}">Editar</a>
+<a th:href="@{/vehicles}">Volver al listado</a>
+</body>
+</html>

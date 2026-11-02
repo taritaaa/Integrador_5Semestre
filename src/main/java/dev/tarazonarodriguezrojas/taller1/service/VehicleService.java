@@ -1,5 +1,6 @@
 package dev.tarazonarodriguezrojas.taller1.service;
 
+import dev.tarazonarodriguezrojas.taller1.model.constant.PlateRules;
 import dev.tarazonarodriguezrojas.taller1.model.dto.PlateModelDTO;
 import dev.tarazonarodriguezrojas.taller1.model.dto.VehicleDTO;
 import dev.tarazonarodriguezrojas.taller1.model.entity.Vehicle;
@@ -18,17 +19,19 @@ import java.util.regex.Pattern;
 public class VehicleService {
 
     // Formatos de placa colombiana aceptados (los del diagrama de base de datos):
-    //  AAA-123           carros, camiones y tractocamiones (tractomulas)
+    //  AAA-123           carros, camionetas, camiones, buses y tractocamiones (tractomulas)
     //  AAA-12A, AAA-12   motos
     //  R-12345           remolques
     //  S-12345           semirremolques (el tráiler de una tractomula)
     //  CC-1234, CD-1234  diplomáticos
+    // Este filtro revisa que la placa tenga algún formato válido; después se revisa que sea
+    // el que le corresponde al tipo de vehículo del modelo (validatePlateForModel).
     private static final Pattern PLATE_PATTERN = Pattern.compile(
             "^(?:[A-Z]{3}-\\d{3}|[A-Z]{3}-\\d{2}[A-Z]?|[RS]-\\d{5}|C[CD]-\\d{4})$");
 
     // Mensaje que se muestra cuando la placa no tiene un formato válido
     private static final String PLATE_FORMATS_HELP =
-            "Formatos válidos: ABC-123 (carro, camión o tractomula), ABC-12 o ABC-12A (moto), "
+            "Formatos válidos: ABC-123 (carro, camioneta, camión o tractomula), ABC-12 o ABC-12A (moto), "
                     + "R-12345 (remolque), S-12345 (semirremolque), CC-1234 o CD-1234 (diplomático)";
 
     private final VehicleRepository repository;
@@ -71,6 +74,8 @@ public class VehicleService {
         }
 
         VehicleModel model = findModel(request.modelId());
+        // La placa debe corresponder al tipo de vehículo y de servicio del modelo
+        validatePlateForModel(plate, model);
 
         Vehicle vehicle = new Vehicle();
         vehicle.setLicensePlate(plate);
@@ -86,6 +91,8 @@ public class VehicleService {
         validate(request);
 
         VehicleModel model = findModel(request.modelId());
+        // Si cambia el modelo, la placa que ya tiene debe seguir siendo válida para ese modelo
+        validatePlateForModel(vehicle.getLicensePlate(), model);
         setAttributesFromDTO(request, vehicle, model);
 
         return toDTO(repository.save(vehicle));
@@ -112,10 +119,12 @@ public class VehicleService {
         Vehicle vehicle = repository.findByLicensePlate(plate)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "No hay un vehículo registrado con la placa " + plate));
+        VehicleModel model = vehicle.getModel();
+        // El tipo sale del modelo, así distingue carro, camioneta, tractomula, etc.
         return new PlateModelDTO(vehicle.getLicensePlate(),
-                describePlateType(vehicle.getLicensePlate()),
-                vehicle.getModel().getName(),
-                vehicle.getModel().getBrand());
+                model.getVehicleType().label() + " - " + model.getServiceType().label(),
+                model.getName(),
+                model.getBrand());
     }
 
     private Vehicle findEntity(Integer vehicleId) {
@@ -129,6 +138,16 @@ public class VehicleService {
         }
         return modelRepository.findById(modelId)
                 .orElseThrow(() -> new EntityNotFoundException("Modelo con id " + modelId + " no encontrado"));
+    }
+
+    // La placa (ya normalizada) debe tener el formato del tipo de vehículo y de servicio del modelo.
+    // Ejemplo: un modelo de moto solo acepta placas como ABC-12A.
+    private void validatePlateForModel(String plate, VehicleModel model) {
+        if (!PlateRules.matches(model.getVehicleType(), model.getServiceType(), plate)) {
+            throw new IllegalArgumentException("La placa " + plate + " no corresponde al modelo seleccionado ("
+                    + model.getVehicleType().label() + ", " + model.getServiceType().label() + "). "
+                    + "Formato esperado: " + PlateRules.format(model.getVehicleType(), model.getServiceType()));
+        }
     }
 
     // Copia los datos del DTO a la entidad (todos menos la placa, que se asigna solo al crear)
@@ -183,23 +202,6 @@ public class VehicleService {
 
     private boolean isValidLicensePlate(String plate) {
         return PLATE_PATTERN.matcher(plate).matches();
-    }
-
-    // Describe el tipo de placa según su formato (la placa ya viene normalizada)
-    private String describePlateType(String plate) {
-        if (plate.matches("[A-Z]{3}-\\d{3}")) {
-            return "Carro, camión o tractocamión (tractomula)";
-        }
-        if (plate.matches("[A-Z]{3}-\\d{2}[A-Z]?")) {
-            return "Moto";
-        }
-        if (plate.startsWith("R-")) {
-            return "Remolque";
-        }
-        if (plate.startsWith("S-")) {
-            return "Semirremolque (tráiler de tractomula)";
-        }
-        return "Diplomático";
     }
 
     // Validaciones de los datos que no dependen de la base de datos
