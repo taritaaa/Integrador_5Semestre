@@ -6,13 +6,15 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * Modelo de vehículo (por ejemplo: "Spark GT", marca "Chevrolet").
  * Se llama VehicleModel y no Model para no confundirse con
  * org.springframework.ui.Model, que se usa en los controladores.
  *
- * Además de nombre y marca, guarda el tipo de vehículo (carro, moto, tractomula...) y el tipo
- * de servicio (particular, público...). Con eso se sabe qué placa le corresponde a sus vehículos.
+ * Además de nombre y marca, guarda el tipo de vehículo (carro, moto, tractomula...), que define
+ * el formato de placa de sus vehículos. El tipo de servicio (particular, público...) NO se guarda
+ * aquí: se pide al registrar cada vehículo.
  *
  * Relaciones:
  * - Un modelo clasifica muchos vehículos.
@@ -39,11 +41,6 @@ public class VehicleModel {
     @Column(name = "vehicle_type", nullable = false, length = 20)
     private VehicleType vehicleType;
 
-    // Tipo de servicio (particular, público, oficial, diplomático)
-    @Enumerated(EnumType.STRING)
-    @Column(name = "service_type", nullable = false, length = 20)
-    private ServiceType serviceType;
-
     // Lista de vehículos de este modelo.
     // mappedBy = "model": la llave foránea está en el atributo "model" de Vehicle
     @OneToMany(mappedBy = "model")
@@ -59,11 +56,10 @@ public class VehicleModel {
     }
 
     // Constructor para crear un modelo nuevo (el id lo genera la base de datos)
-    public VehicleModel(String name, String brand, VehicleType vehicleType, ServiceType serviceType) {
+    public VehicleModel(String name, String brand, VehicleType vehicleType) {
         this.name = name;
         this.brand = brand;
         this.vehicleType = vehicleType;
-        this.serviceType = serviceType;
     }
 
     public Integer getId() {
@@ -96,14 +92,6 @@ public class VehicleModel {
 
     public void setVehicleType(VehicleType vehicleType) {
         this.vehicleType = vehicleType;
-    }
-
-    public ServiceType getServiceType() {
-        return serviceType;
-    }
-
-    public void setServiceType(ServiceType serviceType) {
-        this.serviceType = serviceType;
     }
 
     public List<Vehicle> getVehicles() {

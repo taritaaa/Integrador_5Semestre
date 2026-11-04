@@ -1,6 +1,5 @@
 package dev.tarazonarodriguezrojas.taller1.controller;
 
-import dev.tarazonarodriguezrojas.taller1.model.constant.ServiceType;
 import dev.tarazonarodriguezrojas.taller1.model.constant.VehicleType;
 import dev.tarazonarodriguezrojas.taller1.model.dto.VehicleModelDTO;
 import dev.tarazonarodriguezrojas.taller1.service.VehicleModelService;
@@ -41,7 +40,7 @@ public class VehicleModelController {
     // RF-08: formulario vacío para registrar
     @GetMapping("/new")
     public String getNewModelTemplate(Model model) {
-        model.addAttribute("vehicleModel", new VehicleModelDTO(null, "", "", null, null));
+        model.addAttribute("vehicleModel", new VehicleModelDTO(null, "", "", null));
         loadFormData(model);
         return "models/form";
     }
@@ -105,7 +104,7 @@ public class VehicleModelController {
             return "redirect:/models";
         } catch (IllegalArgumentException e) {
             model.addAttribute("vehicleModel", new VehicleModelDTO(id, request.name(), request.brand(),
-                    request.vehicleType(), request.serviceType()));
+                    request.vehicleType()));
             model.addAttribute("errorMessage", e.getMessage());
             loadFormData(model);
             return "models/form";
@@ -124,9 +123,8 @@ public class VehicleModelController {
         return "redirect:/models";
     }
 
-    // Datos que necesita el formulario: tipos de vehículo y tipos de servicio
+    // Datos que necesita el formulario: tipos de vehículo
     private void loadFormData(Model model) {
         model.addAttribute("vehicleTypes", VehicleType.values());
-        model.addAttribute("serviceTypes", ServiceType.values());
     }
 }

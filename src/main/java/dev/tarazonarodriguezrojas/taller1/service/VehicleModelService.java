@@ -81,16 +81,16 @@ public class VehicleModelService {
         model.setName(request.name().trim());
         model.setBrand(request.brand().trim());
         model.setVehicleType(request.vehicleType());
-        model.setServiceType(request.serviceType());
     }
 
     private VehicleModelDTO toDTO(VehicleModel model) {
         return new VehicleModelDTO(model.getId(), model.getName(), model.getBrand(),
-                model.getVehicleType(), model.getServiceType());
+                model.getVehicleType());
     }
 
     // Nombre y marca son obligatorios y miden máximo 100 caracteres (igual que la columna).
-    // El tipo de vehículo y el tipo de servicio también son obligatorios.
+    // El tipo de vehículo también es obligatorio. El tipo de servicio ya no se pide aquí:
+    // se elige al registrar cada vehículo.
     private void validate(VehicleModelDTO request) {
         if (request.name() == null || request.name().isBlank()) {
             throw new IllegalArgumentException("El nombre del modelo es obligatorio");
@@ -106,9 +106,6 @@ public class VehicleModelService {
         }
         if (request.vehicleType() == null) {
             throw new IllegalArgumentException("El tipo de vehículo es obligatorio");
-        }
-        if (request.serviceType() == null) {
-            throw new IllegalArgumentException("El tipo de servicio es obligatorio");
         }
     }
 }

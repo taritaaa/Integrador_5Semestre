@@ -1,31 +1,26 @@
 package dev.tarazonarodriguezrojas.taller1.model.constant;
 
 /**
- * Tipo de servicio de un modelo: particular, público, oficial o diplomático.
- * Para público y particular se sugiere el color de placa (amarilla y blanca).
- * Para oficial y diplomático no se sugiere ninguno: lo elige el usuario.
+ * Tipo de servicio de un vehículo: particular, público, oficial o diplomático.
+ * Se elige al registrar el vehículo (no en el modelo, porque un mismo modelo puede tener
+ * vehículos particulares y públicos).
+ * El color de la placa sale del servicio y del tipo de vehículo: ver PlateRules.plateColor.
  */
 public enum ServiceType {
 
-    PRIVATE("Particular (privado)", PlateColor.WHITE),
-    PUBLIC("Público", PlateColor.YELLOW),
-    OFFICIAL("Oficial", null),
-    DIPLOMATIC("Diplomático", null);
+    PRIVATE("Particular (privado)"),
+    PUBLIC("Público"),
+    OFFICIAL("Oficial"),
+    DIPLOMATIC("Diplomático");
 
     private final String label;
-    private final PlateColor suggestedPlateColor;
 
-    ServiceType(String label, PlateColor suggestedPlateColor) {
+    ServiceType(String label) {
         this.label = label;
-        this.suggestedPlateColor = suggestedPlateColor;
     }
 
+    // Nombre en español para mostrar en pantalla
     public String label() {
         return label;
-    }
-
-    // Puede ser nulo (oficial y diplomático)
-    public PlateColor suggestedPlateColor() {
-        return suggestedPlateColor;
     }
 }

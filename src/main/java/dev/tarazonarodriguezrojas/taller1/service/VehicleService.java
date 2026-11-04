@@ -1,6 +1,8 @@
 package dev.tarazonarodriguezrojas.taller1.service;
 
+import dev.tarazonarodriguezrojas.taller1.model.constant.PlateColor;
 import dev.tarazonarodriguezrojas.taller1.model.constant.PlateRules;
+import dev.tarazonarodriguezrojas.taller1.model.constant.ServiceType;
 import dev.tarazonarodriguezrojas.taller1.model.dto.PlateModelDTO;
 import dev.tarazonarodriguezrojas.taller1.model.dto.VehicleDTO;
 import dev.tarazonarodriguezrojas.taller1.model.entity.Vehicle;
@@ -25,7 +27,8 @@ public class VehicleService {
     //  S-12345           semirremolques (el tráiler de una tractomula)
     //  CC-1234, CD-1234  diplomáticos
     // Este filtro revisa que la placa tenga algún formato válido; después se revisa que sea
-    // el que le corresponde al tipo de vehículo del modelo (validatePlateForModel).
+    // el que le corresponde al tipo de vehículo del modelo y al servicio del vehículo
+    // (validatePlateForModel).
     private static final Pattern PLATE_PATTERN = Pattern.compile(
             "^(?:[A-Z]{3}-\\d{3}|[A-Z]{3}-\\d{2}[A-Z]?|[RS]-\\d{5}|C[CD]-\\d{4})$");
 
@@ -74,8 +77,8 @@ public class VehicleService {
         }
 
         VehicleModel model = findModel(request.modelId());
-        // La placa debe corresponder al tipo de vehículo y de servicio del modelo
-        validatePlateForModel(plate, model);
+        // La placa debe corresponder al tipo de vehículo del modelo y al servicio elegido
+        validatePlateForModel(plate, model, request.serviceType());
 
         Vehicle vehicle = new Vehicle();
         vehicle.setLicensePlate(plate);
@@ -91,8 +94,8 @@ public class VehicleService {
         validate(request);
 
         VehicleModel model = findModel(request.modelId());
-        // Si cambia el modelo, la placa que ya tiene debe seguir siendo válida para ese modelo
-        validatePlateForModel(vehicle.getLicensePlate(), model);
+        // Si cambia el modelo o el servicio, la placa que ya tiene debe seguir siendo válida
+        validatePlateForModel(vehicle.getLicensePlate(), model, request.serviceType());
         setAttributesFromDTO(request, vehicle, model);
 
         return toDTO(repository.save(vehicle));
@@ -120,9 +123,9 @@ public class VehicleService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "No hay un vehículo registrado con la placa " + plate));
         VehicleModel model = vehicle.getModel();
-        // El tipo sale del modelo, así distingue carro, camioneta, tractomula, etc.
+        // El tipo sale del modelo (carro, camioneta, tractomula...) y el servicio, del vehículo
         return new PlateModelDTO(vehicle.getLicensePlate(),
-                model.getVehicleType().label() + " - " + model.getServiceType().label(),
+                model.getVehicleType().label() + " - " + vehicle.getServiceType().label(),
                 model.getName(),
                 model.getBrand());
     }
@@ -140,19 +143,36 @@ public class VehicleService {
                 .orElseThrow(() -> new EntityNotFoundException("Modelo con id " + modelId + " no encontrado"));
     }
 
-    // La placa (ya normalizada) debe tener el formato del tipo de vehículo y de servicio del modelo.
-    // Ejemplo: un modelo de moto solo acepta placas como ABC-12A.
-    private void validatePlateForModel(String plate, VehicleModel model) {
-        if (!PlateRules.matches(model.getVehicleType(), model.getServiceType(), plate)) {
-            throw new IllegalArgumentException("La placa " + plate + " no corresponde al modelo seleccionado ("
-                    + model.getVehicleType().label() + ", " + model.getServiceType().label() + "). "
-                    + "Formato esperado: " + PlateRules.format(model.getVehicleType(), model.getServiceType()));
+    // La placa (ya normalizada) debe tener el formato del tipo de vehículo del modelo y del
+    // servicio elegido. Ejemplo: un modelo de moto solo acepta placas como ABC-12A, y un
+    // vehículo diplomático solo acepta CC-1234 o CD-1234.
+    private void validatePlateForModel(String plate, VehicleModel model, ServiceType service) {
+        if (!PlateRules.matches(model.getVehicleType(), service, plate)) {
+            throw new IllegalArgumentException("La placa " + plate + " no corresponde al tipo de vehículo ("
+                    + model.getVehicleType().label() + ") con servicio " + service.label() + ". "
+                    + "Formato esperado: " + PlateRules.format(model.getVehicleType(), service));
         }
+    }
+
+    // El color sale del servicio y del tipo de vehículo. Solo en los vehículos oficiales,
+    // que no tienen un color fijo, se usa el que eligió el usuario.
+    private PlateColor resolvePlateColor(VehicleDTO request, VehicleModel model) {
+        PlateColor color = PlateRules.plateColor(model.getVehicleType(), request.serviceType());
+        if (color != null) {
+            return color;
+        }
+        if (request.plateColor() == null) {
+            throw new IllegalArgumentException("Para un vehículo oficial debe elegir el color de la placa");
+        }
+        return request.plateColor();
     }
 
     // Copia los datos del DTO a la entidad (todos menos la placa, que se asigna solo al crear)
     private void setAttributesFromDTO(VehicleDTO request, Vehicle vehicle, VehicleModel model) {
-        vehicle.setPlateColor(request.plateColor());
+        // Se calcula primero: si falla, todavía no se modificó nada en la entidad
+        PlateColor plateColor = resolvePlateColor(request, model);
+        vehicle.setServiceType(request.serviceType());
+        vehicle.setPlateColor(plateColor);
         vehicle.setOwnerName(request.ownerName().trim());
         vehicle.setOwnerDocument(request.ownerDocument().trim());
         vehicle.setOwnerPhone(request.ownerPhone().trim());
@@ -163,6 +183,7 @@ public class VehicleService {
         return new VehicleDTO(
                 vehicle.getId(),
                 vehicle.getLicensePlate(),
+                vehicle.getServiceType(),
                 vehicle.getPlateColor(),
                 vehicle.getOwnerName(),
                 vehicle.getOwnerDocument(),
@@ -206,8 +227,8 @@ public class VehicleService {
 
     // Validaciones de los datos que no dependen de la base de datos
     private void validate(VehicleDTO request) {
-        if (request.plateColor() == null) {
-            throw new IllegalArgumentException("El color de la placa es obligatorio");
+        if (request.serviceType() == null) {
+            throw new IllegalArgumentException("El tipo de servicio es obligatorio");
         }
         if (request.ownerName() == null || request.ownerName().isBlank()) {
             throw new IllegalArgumentException("El nombre del propietario es obligatorio");

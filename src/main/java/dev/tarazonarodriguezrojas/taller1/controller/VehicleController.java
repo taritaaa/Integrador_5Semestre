@@ -1,6 +1,7 @@
 package dev.tarazonarodriguezrojas.taller1.controller;
 
 import dev.tarazonarodriguezrojas.taller1.model.constant.PlateColor;
+import dev.tarazonarodriguezrojas.taller1.model.constant.ServiceType;
 import dev.tarazonarodriguezrojas.taller1.model.dto.PlateModelDTO;
 import dev.tarazonarodriguezrojas.taller1.model.dto.VehicleDTO;
 import dev.tarazonarodriguezrojas.taller1.service.VehicleModelService;
@@ -56,7 +57,7 @@ public class VehicleController {
     // RF-12: formulario vacío para registrar
     @GetMapping("/new")
     public String getNewVehicleTemplate(Model model) {
-        model.addAttribute("vehicle", new VehicleDTO(null, "", null, "", "", "", null, null, null));
+        model.addAttribute("vehicle", new VehicleDTO(null, "", null, null, "", "", "", null, null, null));
         loadFormData(model);
         return "vehicles/form";
     }
@@ -119,8 +120,8 @@ public class VehicleController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/vehicles";
         } catch (IllegalArgumentException e) {
-            model.addAttribute("vehicle", new VehicleDTO(id, request.licensePlate(), request.plateColor(),
-                    request.ownerName(), request.ownerDocument(), request.ownerPhone(),
+            model.addAttribute("vehicle", new VehicleDTO(id, request.licensePlate(), request.serviceType(),
+                    request.plateColor(), request.ownerName(), request.ownerDocument(), request.ownerPhone(),
                     request.modelId(), null, null));
             model.addAttribute("errorMessage", e.getMessage());
             loadFormData(model);
@@ -140,9 +141,11 @@ public class VehicleController {
         return "redirect:/vehicles";
     }
 
-    // Datos que necesita el formulario: lista de modelos y colores de placa
+    // Datos que necesita el formulario: modelos, tipos de servicio y colores de placa
+    // (los colores solo se eligen a mano en vehículos oficiales)
     private void loadFormData(Model model) {
         model.addAttribute("models", modelService.findAllModels());
+        model.addAttribute("serviceTypes", ServiceType.values());
         model.addAttribute("plateColors", PlateColor.values());
     }
 }

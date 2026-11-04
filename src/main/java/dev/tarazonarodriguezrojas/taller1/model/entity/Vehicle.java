@@ -1,6 +1,7 @@
 package dev.tarazonarodriguezrojas.taller1.model.entity;
 
 import dev.tarazonarodriguezrojas.taller1.model.constant.PlateColor;
+import dev.tarazonarodriguezrojas.taller1.model.constant.ServiceType;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -22,11 +23,18 @@ public class Vehicle {
 
     // Placa del vehículo. Es única: no puede haber dos vehículos con la misma placa.
     // Formatos válidos: AAA-123, AAA-12A, AAA-12, R-12345, S-12345, CC-1234, CD-1234
-    // Todos caben en 7 caracteres. La validación del formato se hará en el servicio.
+    // Todos caben en 7 caracteres. La validación del formato se hace en el servicio.
     @Column(name = "license_plate", nullable = false, unique = true, length = 7)
     private String licensePlate;
 
-    // Color de la placa. Se guarda como texto ("YELLOW", "WHITE", etc.)
+    // Tipo de servicio (particular, público, oficial, diplomático). Se elige al registrar el vehículo.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "service_type", nullable = false, length = 20)
+    private ServiceType serviceType;
+
+    // Color de la placa. Se guarda como texto ("YELLOW", "WHITE", etc.).
+    // Lo calcula el servicio a partir del servicio y el tipo de vehículo (PlateRules.plateColor);
+    // solo en los vehículos oficiales lo elige el usuario.
     @Enumerated(EnumType.STRING)
     @Column(name = "plate_color", nullable = false, length = 20)
     private PlateColor plateColor;
@@ -56,9 +64,10 @@ public class Vehicle {
     public Vehicle() {
     }
 
-    public Vehicle(String licensePlate, PlateColor plateColor, String ownerName,
+    public Vehicle(String licensePlate, ServiceType serviceType, PlateColor plateColor, String ownerName,
                    String ownerDocument, String ownerPhone, VehicleModel model) {
         this.licensePlate = licensePlate;
+        this.serviceType = serviceType;
         this.plateColor = plateColor;
         this.ownerName = ownerName;
         this.ownerDocument = ownerDocument;
@@ -80,6 +89,14 @@ public class Vehicle {
 
     public void setLicensePlate(String licensePlate) {
         this.licensePlate = licensePlate;
+    }
+
+    public ServiceType getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(ServiceType serviceType) {
+        this.serviceType = serviceType;
     }
 
     public PlateColor getPlateColor() {

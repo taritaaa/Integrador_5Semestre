@@ -1,8 +1,17 @@
 package dev.tarazonarodriguezrojas.taller1.model.constant;
 
+
 /**
- * Reglas de la placa según el tipo de vehículo y el tipo de servicio del modelo.
- * Un vehículo diplomático usa siempre el formato CC-1234 o CD-1234; los demás usan el de su tipo.
+ * Reglas de la placa según el tipo de vehículo (del modelo) y el tipo de servicio (del vehículo).
+ *
+ * Formato: un vehículo diplomático usa siempre CC-1234 o CD-1234; los demás usan el de su tipo.
+ *
+ * Color (se calcula, el usuario no lo elige salvo en vehículos oficiales):
+ *   diplomático                 -> azul
+ *   remolque y semirremolque    -> verde
+ *   particular                  -> amarilla
+ *   público                     -> blanca
+ *   oficial                     -> sin color fijo (lo elige el usuario)
  */
 public final class PlateRules {
 
@@ -27,6 +36,22 @@ public final class PlateRules {
             return "CC-1234 o CD-1234 (2 letras, guion y 4 números)";
         }
         return type.plateExample() + " (" + type.plateFormat() + ")";
+    }
+
+    // Color que le corresponde a la placa. Devuelve null si no hay un color fijo (oficial):
+    // en ese caso lo elige el usuario.
+    public static PlateColor plateColor(VehicleType type, ServiceType service) {
+        if (service == ServiceType.DIPLOMATIC) {
+            return PlateColor.BLUE;
+        }
+        if (type.isTrailer()) {
+            return PlateColor.GREEN;
+        }
+        return switch (service) {
+            case PRIVATE -> PlateColor.YELLOW;
+            case PUBLIC -> PlateColor.WHITE;
+            case OFFICIAL, DIPLOMATIC -> null;
+        };
     }
 
     private static String regex(VehicleType type, ServiceType service) {

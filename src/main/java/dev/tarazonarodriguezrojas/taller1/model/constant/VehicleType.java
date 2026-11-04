@@ -43,4 +43,9 @@ public enum VehicleType {
     public String plateFormat() {
         return plateFormat;
     }
+
+    // Remolque y semirremolque llevan siempre placa verde, sin importar el servicio
+    public boolean isTrailer() {
+        return this == TRAILER || this == SEMITRAILER;
+    }
 }
