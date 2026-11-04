@@ -29,14 +29,7 @@
                 th:selected="${vehicleModel.vehicleType() == t}"></option>
     </select>
 
-    <label for="serviceType">Tipo de servicio</label>
-    <select id="serviceType" name="serviceType" required>
-        <option value="">Seleccione</option>
-        <option th:each="s : ${serviceTypes}" th:value="${s}" th:text="${s.label()}"
-                th:selected="${vehicleModel.serviceType() == s}"></option>
-    </select>
-
-    <small>Con el tipo de vehículo y el servicio, al registrar un vehículo de este modelo se le indica el formato de placa que le corresponde.</small>
+    <small>El tipo de vehículo define el formato de placa. El tipo de servicio (particular, público, oficial o diplomático) y el color de la placa se eligen al registrar cada vehículo.</small>
 
     <button type="submit">Guardar</button>
     <a th:href="@{/models}">Cancelar</a>

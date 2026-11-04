@@ -17,34 +17,49 @@
       th:action="${vehicle.id() == null} ? @{/vehicles} : @{/vehicles/{id}(id=${vehicle.id()})}">
     <input type="hidden" name="_method" value="put" th:if="${vehicle.id() != null}">
 
-    <!-- El modelo va primero: su tipo de vehículo y de servicio definen cómo es la placa -->
+    <!-- El modelo define el tipo de vehículo; el servicio se elige aquí.
+         Entre los dos se sabe cómo es la placa y de qué color es. -->
     <label for="modelId">Modelo</label>
     <select id="modelId" name="modelId" required>
         <option value="">Seleccione</option>
         <option th:each="m : ${models}" th:value="${m.id()}"
-                th:text="${m.name() + ' - ' + m.brand() + ' (' + m.vehicleTypeLabel() + ', ' + m.serviceTypeLabel() + ')'}"
-                th:attr="data-example=${m.plateExample()},data-format=${m.plateFormat()},data-color=${m.suggestedPlateColor()}"
+                th:text="${m.name() + ' - ' + m.brand() + ' (' + m.vehicleTypeLabel() + ')'}"
+                th:attr="data-example=${m.plateExample()},data-format=${m.plateFormat()},data-trailer=${m.trailerType()}"
                 th:selected="${vehicle.modelId() == m.id()}"></option>
+    </select>
+
+    <label for="serviceType">Tipo de servicio</label>
+    <select id="serviceType" name="serviceType" required>
+        <option value="">Seleccione</option>
+        <option th:each="s : ${serviceTypes}" th:value="${s}" th:text="${s.label()}"
+                th:selected="${vehicle.serviceType() == s}"></option>
     </select>
 
     <!-- Al registrar, la placa se escribe. Al editar, solo se muestra (no se puede cambiar). -->
     <div th:if="${vehicle.id() == null}">
         <label for="licensePlate">Placa</label>
         <input type="text" id="licensePlate" name="licensePlate" maxlength="7" required
-               placeholder="Seleccione primero el modelo"
+               placeholder="Seleccione primero el modelo y el servicio"
                th:value="${vehicle.licensePlate()}">
     </div>
     <div th:if="${vehicle.id() != null}">
         <p><strong>Placa:</strong> <span th:text="${vehicle.licensePlate()}"></span></p>
         <input type="hidden" name="licensePlate" th:value="${vehicle.licensePlate()}">
     </div>
-    <small id="plateHelp">Seleccione primero el modelo: según su tipo se indica el formato de la placa.</small>
-    <label for="plateColor">Color de la placa</label>
-    <select id="plateColor" name="plateColor" required>
-        <option value="">Seleccione</option>
-        <option th:each="c : ${plateColors}" th:value="${c}" th:text="${c}"
-                th:selected="${vehicle.plateColor() == c}"></option>
-    </select>
+    <small id="plateHelp">Seleccione el modelo y el tipo de servicio: según ellos se indica el formato y el color de la placa.</small>
+
+    <!-- El color no se elige: sale del servicio y del tipo de vehículo. -->
+    <p><strong>Color de la placa:</strong> <span id="colorText">Se define al elegir el modelo y el servicio</span></p>
+
+    <!-- Solo los vehículos oficiales no tienen un color fijo: ahí sí se elige. -->
+    <div id="officialColorBox">
+        <label for="plateColor">Color de la placa (vehículo oficial)</label>
+        <select id="plateColor" name="plateColor">
+            <option value="">Seleccione</option>
+            <option th:each="c : ${plateColors}" th:value="${c}" th:text="${c.label()}"
+                    th:selected="${vehicle.plateColor() == c}"></option>
+        </select>
+    </div>
 
     <label for="ownerName">Nombre del propietario</label>
     <input type="text" id="ownerName" name="ownerName" maxlength="100" required
@@ -63,41 +78,89 @@
 </form>
 
 <script>
-    // Guía de placa: según el modelo elegido muestra el formato, pone el ejemplo en el campo
-    // y sugiere el color de la placa (amarilla = público, blanca = particular).
+    // Guía de placa: según el modelo (tipo de vehículo) y el servicio elegidos, muestra el formato,
+    // pone el ejemplo en el campo y muestra el color de la placa.
+    // Es solo una vista previa: el servidor vuelve a calcular el formato y el color
+    // (PlateRules.plateColor) y es el que manda.
+    //   diplomático -> azul | remolque y semirremolque -> verde | particular -> amarilla | público -> blanca
+    //   oficial -> sin color fijo: se elige a mano
     (function () {
         var model = document.getElementById('modelId');
+        var service = document.getElementById('serviceType');
         var plate = document.getElementById('licensePlate');
-        var color = document.getElementById('plateColor');
         var help = document.getElementById('plateHelp');
-        if (!model || !help) {
+        var colorText = document.getElementById('colorText');
+        var officialBox = document.getElementById('officialColorBox');
+        var officialColor = document.getElementById('plateColor');
+        if (!model || !service || !help) {
             return;
         }
 
-        function update(changedByUser) {
+        var COLOR_LABELS = {YELLOW: 'Amarilla', WHITE: 'Blanca', BLUE: 'Azul', GREEN: 'Verde'};
+        var SERVICE_COLORS = {PRIVATE: 'YELLOW', PUBLIC: 'WHITE'};
+        var DIPLOMATIC_EXAMPLE = 'CD-1234';
+        var DIPLOMATIC_FORMAT = 'CC-1234 o CD-1234 (2 letras, guion y 4 números)';
+        var DEFAULT_HELP = help.textContent;
+
+        function update() {
             var option = model.options[model.selectedIndex];
-            var example = option ? option.getAttribute('data-example') : null;
-            if (!example) {
-                return;
+            var hasModel = !!option && option.value !== '';
+            var serviceValue = service.value;
+            var diplomatic = serviceValue === 'DIPLOMATIC';
+            var trailer = hasModel && option.getAttribute('data-trailer') === 'true';
+
+            // Formato de la placa
+            var example = hasModel ? option.getAttribute('data-example') : '';
+            var format = hasModel ? option.getAttribute('data-format') : '';
+            if (diplomatic) {
+                example = DIPLOMATIC_EXAMPLE;
+                format = DIPLOMATIC_FORMAT;
+            }
+            if (example) {
+                help.textContent = 'Formato de placa: ' + format
+                    + (plate ? '. Puede escribirla con o sin guion.' : '.');
+                if (plate) {
+                    plate.placeholder = example;
+                }
+            } else {
+                help.textContent = DEFAULT_HELP;
             }
 
-                help.textContent = 'Formato de placa para este modelo: ' + option.getAttribute('data-format')
-                + (plate ? '. Puede escribirla con o sin guion.' : '.');
-            if (plate) {
-                plate.placeholder = example;
+            // Color de la placa
+            var color = '';
+            if (diplomatic) {
+                color = 'BLUE';
+            } else if (trailer) {
+                color = 'GREEN';
+            } else {
+                color = SERVICE_COLORS[serviceValue] || '';
             }
-            // El color solo se sugiere cuando el usuario cambia el modelo (no pisa lo ya guardado)
-            var suggested = option.getAttribute('data-color');
-            if (changedByUser && suggested && color) {
-                color.value = suggested;
+            var official = serviceValue === 'OFFICIAL' && !trailer;
+
+            if (officialBox) {
+                officialBox.hidden = !official;
+            }
+            if (officialColor) {
+                officialColor.disabled = !official;   // un campo deshabilitado no se envía
+                officialColor.required = official;
+            }
+            if (colorText) {
+                if (color) {
+                    colorText.textContent = COLOR_LABELS[color] + ' (se asigna automáticamente)';
+                } else if (official) {
+                    colorText.textContent = 'Elíjala en el campo de abajo';
+                } else {
+                    colorText.textContent = 'Se define al elegir el modelo y el servicio';
+                }
             }
         }
 
-        model.addEventListener('change', function () { update(true); });
+        model.addEventListener('change', update);
+        service.addEventListener('change', update);
         if (plate) {
             plate.addEventListener('input', function () { plate.value = plate.value.toUpperCase(); });
         }
-        update(false);
+        update();
     })();
 </script>
 </body>

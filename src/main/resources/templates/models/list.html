@@ -23,7 +23,6 @@
         <th>Nombre</th>
         <th>Marca</th>
         <th>Tipo de vehículo</th>
-        <th>Servicio</th>
         <th>Acciones</th>
     </tr>
     </thead>
@@ -33,7 +32,6 @@
         <td th:text="${m.name()}"></td>
         <td th:text="${m.brand()}"></td>
         <td th:text="${m.vehicleTypeLabel()}"></td>
-        <td th:text="${m.serviceTypeLabel()}"></td>
         <td>
             <a th:href="@{/models/{id}(id=${m.id()})}">Ver</a>
             <span sec:authorize="hasRole('ADMIN')">
