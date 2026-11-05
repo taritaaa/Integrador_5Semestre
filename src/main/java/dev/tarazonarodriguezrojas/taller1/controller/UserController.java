@@ -6,13 +6,10 @@ import dev.tarazonarodriguezrojas.taller1.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.Authentication;
+
 
 /**
  * Pantallas de usuarios (RF-06 y RF-07). Solo para el administrador (ver SecurityConfig).
@@ -109,5 +106,17 @@ public class UserController {
             model.addAttribute("errorMessage", e.getMessage());
             return "users/form";
         }
+    }
+    // Eliminar usuario (el formulario envía _method=delete)
+    @DeleteMapping("/{id}")
+    public String deleteUser(@PathVariable Integer id, Authentication authentication,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            service.deleteUser(id, authentication.getName());
+            redirectAttributes.addFlashAttribute("successMessage", "Usuario eliminado correctamente");
+        } catch (EntityNotFoundException | IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/users";
     }
 }

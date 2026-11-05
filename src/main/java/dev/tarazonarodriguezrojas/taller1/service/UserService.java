@@ -123,4 +123,26 @@ public class UserService {
             throw new IllegalArgumentException("El rol es obligatorio");
         }
     }
+
+    // Eliminar usuario (solo administrador). Reglas:
+    //  - No puede eliminar su propia cuenta.
+    //  - No se elimina si tiene reparaciones asociadas (se debe desactivar para conservar el historial).
+    //  - Siempre debe quedar al menos un administrador activo.
+    public void deleteUser(Integer userId, String requesterEmail)
+            throws EntityNotFoundException, IllegalStateException {
+        User user = findEntity(userId);
+
+        if (user.getEmail().equalsIgnoreCase(requesterEmail)) {
+            throw new IllegalStateException("No puede eliminar su propia cuenta");
+        }
+        if (!user.getRepairs().isEmpty()) {
+            throw new IllegalStateException("No se puede eliminar a " + user.getName()
+                    + " porque tiene reparaciones asociadas. Desactive la cuenta en su lugar");
+        }
+        if (user.getRole() == Role.ADMIN && user.isActive()
+                && repository.countByRoleAndActiveTrue(Role.ADMIN) <= 1) {
+            throw new IllegalStateException("Debe quedar al menos un administrador activo");
+        }
+        repository.delete(user);
+    }
 }
