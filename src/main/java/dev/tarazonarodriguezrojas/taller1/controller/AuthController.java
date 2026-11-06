@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Pantallas de acceso: inicio de sesión (RF-01), recuperación de contraseña (RF-03),
- * restablecimiento (RF-04) y acceso denegado (RF-05).
+ * restablecimiento (RF-04), cambio de contraseña temporal y acceso denegado (RF-05).
  * El envío del formulario de login (POST /login) y el cierre de sesión (POST /logout,
  * RF-02) los maneja Spring Security, configurado en SecurityConfig.
  */
@@ -80,6 +80,30 @@ public class AuthController {
             model.addAttribute("tokenValid", service.isRecoveryTokenValid(token));
             model.addAttribute("errorMessage", e.getMessage());
             return "auth/reset-password";
+        }
+    }
+
+    // Cambio de contraseña con la sesión iniciada. Es la pantalla a la que se envía al usuario
+    // en su primer ingreso (contraseña temporal); ver PasswordChangeInterceptor.
+    @GetMapping("/change-password")
+    public String getChangePasswordTemplate() {
+        return "auth/change-password";
+    }
+
+    // Guardar la nueva contraseña (debe cumplir la política de alta seguridad)
+    @PostMapping("/change-password")
+    public String changePassword(@RequestParam("currentPassword") String currentPassword,
+                                 @RequestParam("newPassword") String newPassword,
+                                 @RequestParam("confirmPassword") String confirmPassword,
+                                 Authentication authentication, Model model,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            service.changePassword(authentication.getName(), currentPassword, newPassword, confirmPassword);
+            redirectAttributes.addFlashAttribute("successMessage", "Contraseña actualizada correctamente");
+            return "redirect:/";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "auth/change-password";
         }
     }
 

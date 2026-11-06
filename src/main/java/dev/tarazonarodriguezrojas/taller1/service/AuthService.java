@@ -62,7 +62,8 @@ public class AuthService {
                 .isPresent();
     }
 
-    // RF-04: establecer la nueva contraseña con el enlace recibido
+    // RF-04: establecer la nueva contraseña con el enlace recibido.
+    // La nueva contraseña debe cumplir la política (alta seguridad).
     public void resetPassword(String token, String newPassword, String confirmPassword)
             throws IllegalArgumentException {
         if (token == null || token.isBlank()) {
@@ -78,9 +79,33 @@ public class AuthService {
         }
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setMustChangePassword(false);
         // El enlace solo sirve una vez
         user.setRecoveryToken(null);
         user.setTokenExpiration(null);
+        repository.save(user);
+    }
+
+    // Cambio de contraseña con la sesión iniciada (primer ingreso con la contraseña temporal).
+    // Pide la contraseña actual, exige que la nueva cumpla la política y que sea distinta.
+    public void changePassword(String email, String currentPassword, String newPassword,
+                               String confirmPassword) throws IllegalArgumentException {
+        User user = repository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        if (currentPassword == null || !passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("La contraseña actual no es correcta");
+        }
+        PasswordPolicy.validate(newPassword);
+        if (!newPassword.equals(confirmPassword)) {
+            throw new IllegalArgumentException("Las contraseñas no coinciden");
+        }
+        if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("La nueva contraseña debe ser diferente a la actual");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setMustChangePassword(false);
         repository.save(user);
     }
 }

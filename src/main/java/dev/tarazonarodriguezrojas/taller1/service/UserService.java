@@ -38,7 +38,11 @@ public class UserService {
         return toDTO(findEntity(userId));
     }
 
-    // RF-06: registrar usuario (mecánico u otro administrador). La contraseña se guarda cifrada.
+    // RF-06: registrar usuario (mecánico u otro administrador).
+    // La contraseña NO la escribe el administrador: el sistema genera una temporal, aleatoria y
+    // que cumple la política. La cuenta queda marcada para cambiarla en el primer inicio de sesión.
+    // La contraseña temporal se devuelve en el campo "password" del DTO UNA sola vez,
+    // para que el administrador se la entregue al usuario. En la base de datos solo queda cifrada.
     public UserDTO createUser(UserDTO request) throws IllegalArgumentException {
         validateCommon(request);
 
@@ -55,7 +59,6 @@ public class UserService {
         if (email.length() > 100 || !EMAIL_PATTERN.matcher(email).matches()) {
             throw new IllegalArgumentException("El correo no es válido");
         }
-        PasswordPolicy.validate(request.password());
 
         String document = request.document().trim();
         if (repository.existsByEmailIgnoreCase(email)) {
@@ -65,9 +68,15 @@ public class UserService {
             throw new IllegalArgumentException("Ya existe un usuario con el documento " + document);
         }
 
+        String tempPassword = PasswordPolicy.generateTemporary();
         User user = new User(request.name().trim(), document, email, request.phone().trim(),
-                passwordEncoder.encode(request.password()), request.role());
-        return toDTO(repository.save(user));
+                passwordEncoder.encode(tempPassword), request.role());
+        user.setMustChangePassword(true);
+        User saved = repository.save(user);
+
+        // Único lugar donde la contraseña viaja en el DTO: para mostrarla una vez al administrador
+        return new UserDTO(saved.getId(), saved.getName(), saved.getDocument(), saved.getEmail(),
+                saved.getPhone(), tempPassword, saved.getRole(), saved.isActive());
     }
 
     // RF-07: actualizar nombre, teléfono, rol y estado. Desactivar una cuenta es poner active en false.
@@ -92,6 +101,28 @@ public class UserService {
         user.setRole(request.role());
         user.setActive(request.active());
         return toDTO(repository.save(user));
+    }
+
+    // Eliminar usuario (solo administrador). Reglas:
+    //  - No puede eliminar su propia cuenta.
+    //  - No se elimina si tiene reparaciones asociadas (se debe desactivar para conservar el historial).
+    //  - Siempre debe quedar al menos un administrador activo.
+    public void deleteUser(Integer userId, String requesterEmail)
+            throws EntityNotFoundException, IllegalStateException {
+        User user = findEntity(userId);
+
+        if (user.getEmail().equalsIgnoreCase(requesterEmail)) {
+            throw new IllegalStateException("No puede eliminar su propia cuenta");
+        }
+        if (!user.getRepairs().isEmpty()) {
+            throw new IllegalStateException("No se puede eliminar a " + user.getName()
+                    + " porque tiene reparaciones asociadas. Desactive la cuenta en su lugar");
+        }
+        if (user.getRole() == Role.ADMIN && user.isActive()
+                && repository.countByRoleAndActiveTrue(Role.ADMIN) <= 1) {
+            throw new IllegalStateException("Debe quedar al menos un administrador activo");
+        }
+        repository.delete(user);
     }
 
     private User findEntity(Integer userId) {
@@ -122,27 +153,5 @@ public class UserService {
         if (request.role() == null) {
             throw new IllegalArgumentException("El rol es obligatorio");
         }
-    }
-
-    // Eliminar usuario (solo administrador). Reglas:
-    //  - No puede eliminar su propia cuenta.
-    //  - No se elimina si tiene reparaciones asociadas (se debe desactivar para conservar el historial).
-    //  - Siempre debe quedar al menos un administrador activo.
-    public void deleteUser(Integer userId, String requesterEmail)
-            throws EntityNotFoundException, IllegalStateException {
-        User user = findEntity(userId);
-
-        if (user.getEmail().equalsIgnoreCase(requesterEmail)) {
-            throw new IllegalStateException("No puede eliminar su propia cuenta");
-        }
-        if (!user.getRepairs().isEmpty()) {
-            throw new IllegalStateException("No se puede eliminar a " + user.getName()
-                    + " porque tiene reparaciones asociadas. Desactive la cuenta en su lugar");
-        }
-        if (user.getRole() == Role.ADMIN && user.isActive()
-                && repository.countByRoleAndActiveTrue(Role.ADMIN) <= 1) {
-            throw new IllegalStateException("Debe quedar al menos un administrador activo");
-        }
-        repository.delete(user);
     }
 }

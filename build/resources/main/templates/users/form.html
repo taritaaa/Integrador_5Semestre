@@ -19,7 +19,8 @@
     <label for="name">Nombre</label>
     <input type="text" id="name" name="name" maxlength="100" required th:value="${user.name()}">
 
-    <!-- Al registrar se escriben documento, correo y contraseña. Al editar, documento y correo solo se muestran. -->
+    <!-- Al registrar se escriben documento y correo (la contraseña se genera sola).
+         Al editar, documento y correo solo se muestran. -->
     <div th:if="${user.id() == null}">
         <label for="document">Documento</label>
         <input type="text" id="document" name="document" maxlength="20" required th:value="${user.document()}">
@@ -27,8 +28,8 @@
         <label for="email">Correo</label>
         <input type="email" id="email" name="email" maxlength="100" required th:value="${user.email()}">
 
-        <label for="password">Contraseña (8 a 72 caracteres, con mayúscula, minúscula, número y símbolo)</label>
-        <input type="password" id="password" name="password" minlength="8" maxlength="72" required>
+        <p><small>La contraseña se genera automáticamente y se le mostrará al terminar el registro.
+            El usuario deberá cambiarla en su primer inicio de sesión.</small></p>
     </div>
     <div th:if="${user.id() != null}">
         <p><strong>Documento:</strong> <span th:text="${user.document()}"></span></p>

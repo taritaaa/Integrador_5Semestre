@@ -1,6 +1,6 @@
 #FileLock
-#Thu Nov 05 12:55:01 COT 2026
+#Thu Nov 05 19:46:40 COT 2026
 hostName=Juliana
-id=1a1acd972a9cfd01198b632214d4bde6bcdbebe0295
+id=1a1ae525a51f62276f6a18e308cd11e0dc924da04a2
 method=file
-server=192.168.56.1\:53913
+server=192.168.56.1\:65419

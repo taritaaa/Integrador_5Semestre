@@ -47,6 +47,13 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
+    // Verdadero cuando la contraseña es temporal (cuenta recién creada por el administrador).
+    // Mientras sea verdadero, el usuario solo puede entrar a la pantalla de cambio de contraseña.
+    // columnDefinition con "default false": así Hibernate puede agregar la columna a una tabla
+    // que ya tiene usuarios (sin el valor por defecto, la base de datos rechaza la columna nueva).
+    @Column(name = "must_change_password", nullable = false, columnDefinition = "boolean default false")
+    private boolean mustChangePassword = false;
+
     // Token temporal para recuperar la contraseña.
     // Es nulo cuando no hay una solicitud pendiente.
     @Column(name = "recovery_token", length = 100)
@@ -136,6 +143,14 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isMustChangePassword() {
+        return mustChangePassword;
+    }
+
+    public void setMustChangePassword(boolean mustChangePassword) {
+        this.mustChangePassword = mustChangePassword;
     }
 
     public String getRecoveryToken() {

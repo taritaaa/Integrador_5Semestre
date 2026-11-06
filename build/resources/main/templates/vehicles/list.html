@@ -32,7 +32,6 @@
     <tr>
         <th>ID</th>
         <th>Placa</th>
-        <th>Servicio</th>
         <th>Color de placa</th>
         <th>Propietario</th>
         <th>Modelo</th>
@@ -43,8 +42,7 @@
     <tr th:each="v : ${vehicles}">
         <td th:text="${v.id()}"></td>
         <td th:text="${v.licensePlate()}"></td>
-        <td th:text="${v.serviceTypeLabel()}"></td>
-        <td th:text="${v.plateColorLabel()}"></td>
+        <td th:text="${v.plateColor()}"></td>
         <td th:text="${v.ownerName()}"></td>
         <td th:text="${v.modelName() + ' - ' + v.modelBrand()}"></td>
         <td>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Usuarios - Taller</title>
@@ -12,6 +13,14 @@
 
 <p th:if="${successMessage}" th:text="${successMessage}"></p>
 <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+<!-- Contraseña temporal del usuario recién creado. Se muestra una sola vez
+     (en un recuadro y no en un toast, para que no desaparezca a los pocos segundos). -->
+<div th:if="${tempPassword}">
+    <p><strong>Contraseña temporal para <span th:text="${tempEmail}"></span>:</strong>
+        <code th:text="${tempPassword}"></code></p>
+    <small>Cópiela ahora: no se vuelve a mostrar. El usuario deberá cambiarla en su primer ingreso.</small>
+</div>
 
 <a th:href="@{/users/new}">Registrar usuario</a>
 
@@ -36,6 +45,7 @@
         <td>
             <a th:href="@{/users/{id}(id=${u.id()})}">Ver</a>
             <a th:href="@{/users/{id}/edit(id=${u.id()})}">Editar</a>
+            <!-- El botón no aparece en la fila del propio administrador -->
             <form th:unless="${#authentication.name == u.email()}"
                   th:action="@{/users/{id}(id=${u.id()})}" method="post" style="display:inline"
                   onsubmit="return confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')">
