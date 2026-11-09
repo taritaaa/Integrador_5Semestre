@@ -1,171 +1,118 @@
-
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Vehículo - Taller</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
 </head>
 <body>
-
 <div th:replace="~{fragments/nav :: nav}"></div>
 
-<h1 th:text="${vehicle.id() == null} ? 'Registrar vehículo' : 'Editar vehículo'">
-    Registrar vehículo
-</h1>
+<h1 th:text="${vehicle.id() == null} ? 'Registrar vehículo' : 'Editar vehículo'"></h1>
 
 <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
-
-<p th:if="${models.isEmpty()}">
-    Primero debe registrar un modelo en
-    <a th:href="@{/models}">Modelos</a>.
-</p>
+<p th:if="${models.isEmpty()}">Primero debe registrar un modelo en <a th:href="@{/models}">Modelos</a>.</p>
 
 <form method="post"
       th:action="${vehicle.id() == null} ? @{/vehicles} : @{/vehicles/{id}(id=${vehicle.id()})}">
+    <input type="hidden" name="_method" value="put" th:if="${vehicle.id() != null}">
 
-    <input type="hidden"
-           name="_method"
-           value="put"
-           th:if="${vehicle.id() != null}">
-
-    <!-- Modelo -->
+    <!-- El modelo define el tipo de vehículo; el servicio se elige en este formulario. -->
     <label for="modelId">Modelo</label>
-
-    <select id="modelId"
-            name="modelId"
-            required>
-
+    <select id="modelId" name="modelId" required>
         <option value="">Seleccione</option>
-
-        <option th:each="m : ${models}"
-                th:value="${m.id()}"
+        <option th:each="m : ${models}" th:value="${m.id()}"
                 th:text="${m.name() + ' - ' + m.brand() + ' (' + m.vehicleTypeLabel() + ')'}"
-                th:attr="data-example=${m.plateExample()},
-                         data-format=${m.plateFormat()},
-                         data-trailer=${m.trailerType()}"
-                th:selected="${vehicle.modelId() == m.id()}">
-        </option>
-
+                th:attr="data-example=${m.plateExample()},data-format=${m.plateFormat()}"
+                th:selected="${vehicle.modelId() == m.id()}"></option>
     </select>
 
-    <!-- Tipo de servicio -->
     <label for="serviceType">Tipo de servicio</label>
-
-    <select id="serviceType"
-            name="serviceType"
-            required>
-
+    <select id="serviceType" name="serviceType" required>
         <option value="">Seleccione</option>
-
-        <option th:each="s : ${serviceTypes}"
-                th:value="${s}"
-                th:text="${s.label()}"
-                th:selected="${vehicle.serviceType() == s}">
-        </option>
-
+        <option th:each="s : ${serviceTypes}" th:value="${s}" th:text="${s.label()}"
+                th:selected="${vehicle.serviceType() == s}"></option>
     </select>
 
-    <!-- Placa: registrar -->
+    <!-- Al registrar, la placa se escribe. Al editar, solo se muestra (no se puede cambiar). -->
     <div th:if="${vehicle.id() == null}">
-
         <label for="licensePlate">Placa</label>
-
-        <input type="text"
-               id="licensePlate"
-               name="licensePlate"
-               maxlength="7"
-               required
+        <input type="text" id="licensePlate" name="licensePlate" maxlength="7" required
                placeholder="Seleccione primero el modelo"
                th:value="${vehicle.licensePlate()}">
-
     </div>
-
-    <!-- Placa: editar -->
     <div th:if="${vehicle.id() != null}">
-
-        <p>
-            <strong>Placa:</strong>
-            <span th:text="${vehicle.licensePlate()}"></span>
-        </p>
-
-        <input type="hidden"
-               name="licensePlate"
-               th:value="${vehicle.licensePlate()}">
-
+        <p><strong>Placa:</strong> <span th:text="${vehicle.licensePlate()}"></span></p>
+        <input type="hidden" name="licensePlate" th:value="${vehicle.licensePlate()}">
     </div>
-
-    <small id="plateHelp">
-        Seleccione un modelo y un tipo de servicio
-        para conocer el formato de placa.
-    </small>
-
-    <!-- Color de placa -->
-    <label for="plateColor">Color de placa</label>
-
-    <select id="plateColor"
-            name="plateColor">
-
-        <option value="">Automático</option>
-
-        <option th:each="c : ${plateColors}"
-                th:value="${c}"
-                th:text="${c.label()}"
-                th:selected="${vehicle.plateColor() == c}">
-        </option>
-
+    <small id="plateHelp">Seleccione primero el modelo: según su tipo se indica el formato de la placa.</small>
+    <label for="plateColor">Color de la placa</label>
+    <select id="plateColor" name="plateColor" required>
+        <option value="">Seleccione</option>
+        <option th:each="c : ${plateColors}" th:value="${c}" th:text="${c}"
+                th:selected="${vehicle.plateColor() == c}"></option>
     </select>
 
-    <small id="plateColorHelp">
-        El color se calcula automáticamente.
-        En vehículos oficiales debe seleccionar un color.
-    </small>
-
-    <!-- Nombre del propietario -->
     <label for="ownerName">Nombre del propietario</label>
-
-    <input type="text"
-           id="ownerName"
-           name="ownerName"
-           maxlength="100"
-           required
+    <input type="text" id="ownerName" name="ownerName" maxlength="100" required
            th:value="${vehicle.ownerName()}">
 
-    <!-- Documento del propietario -->
     <label for="ownerDocument">Documento del propietario</label>
-
-    <input type="text"
-           id="ownerDocument"
-           name="ownerDocument"
-           maxlength="20"
-           required
+    <input type="text" id="ownerDocument" name="ownerDocument" maxlength="20" required
            th:value="${vehicle.ownerDocument()}">
 
-    <!-- Teléfono del propietario -->
-    <label for="ownerPhone">Teléfono del propietario</label>
+    <label for="phoneCountry">País e indicativo del propietario</label>
+    <select id="phoneCountry" class="phone-country" required>
+        <option value="+57">Colombia (+57)</option>
+        <option value="+52">México (+52)</option>
+        <option value="+1">Estados Unidos / Canadá (+1)</option>
+        <option value="+34">España (+34)</option>
+        <option value="+56">Chile (+56)</option>
+        <option value="+51">Perú (+51)</option>
+    </select>
+    <label for="phoneLocal">Celular del propietario</label>
+    <input id="phoneLocal" class="phone-local" type="tel" inputmode="numeric" required
+           placeholder="3001234567" pattern="[0-9]+">
+    <input type="hidden" id="ownerPhone" name="ownerPhone" th:value="${vehicle.ownerPhone()}">
+    <small>Ejemplo Colombia: +573001234567.</small>
 
-    <input type="text"
-           id="ownerPhone"
-           name="ownerPhone"
-           maxlength="20"
-           required
-           th:value="${vehicle.ownerPhone()}">
-
-    <!-- Botones -->
-    <div>
-        <button type="submit"
-                th:disabled="${models.isEmpty()}">
-            Guardar
-        </button>
-
-        <a th:href="@{/vehicles}">Cancelar</a>
-    </div>
-
+    <button type="submit">Guardar</button>
+    <a th:href="@{/vehicles}">Cancelar</a>
 </form>
 
-<!-- JavaScript separado del HTML -->
-<script th:src="@{/js/vehicles.js}"></script>
+<script>
+    // Guía de placa: según el modelo elegido muestra el formato, pone el ejemplo en el campo
+    // El tipo de servicio y el tipo de vehículo se validan en VehicleService.
+    (function () {
+        var model = document.getElementById('modelId');
+        var plate = document.getElementById('licensePlate');
+        var help = document.getElementById('plateHelp');
+        if (!model || !help) {
+            return;
+        }
 
+        function update() {
+            var option = model.options[model.selectedIndex];
+            var example = option ? option.getAttribute('data-example') : null;
+            if (!example) {
+                return;
+            }
+
+                help.textContent = 'Formato de placa para este modelo: ' + option.getAttribute('data-format')
+                + (plate ? '. Puede escribirla con o sin guion.' : '.');
+            if (plate) {
+                plate.placeholder = example;
+            }
+
+        }
+
+        model.addEventListener('change', update);
+        if (plate) {
+            plate.addEventListener('input', function () { plate.value = plate.value.toUpperCase(); });
+        }
+        update();
+    })();
+</script>
+<script th:src="@{/js/phone-validation.js}"></script>
 </body>
 </html>

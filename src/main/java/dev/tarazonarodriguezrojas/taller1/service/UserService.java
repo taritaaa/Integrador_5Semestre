@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 @Transactional
 public class UserService {
 
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)+$");
 
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
@@ -69,7 +69,7 @@ public class UserService {
         }
 
         String tempPassword = PasswordPolicy.generateTemporary();
-        User user = new User(request.name().trim(), document, email, request.phone().trim(),
+        User user = new User(request.name().trim(), document, email, PhoneValidation.validate(request.phone()),
                 passwordEncoder.encode(tempPassword), request.role());
         user.setMustChangePassword(true);
         User saved = repository.save(user);
@@ -97,7 +97,7 @@ public class UserService {
         }
 
         user.setName(request.name().trim());
-        user.setPhone(request.phone().trim());
+        user.setPhone(PhoneValidation.validate(request.phone()));
         user.setRole(request.role());
         user.setActive(request.active());
         return toDTO(repository.save(user));

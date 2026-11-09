@@ -1,6 +1,6 @@
-   .gradle/
-   build/
-   .idea/
-   uploads/
-   data/
-   src/main/resources/application-local.properties
+.gradle/
+build/
+.idea/
+uploads/
+data/
+src/main/resources/application-local.properties
