@@ -1,23 +1,98 @@
+
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
     <meta charset="UTF-8">
     <title>Detalle del vehículo - Taller</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
 </head>
+
 <body>
+
+<div th:replace="~{fragments/nav :: nav}"></div>
+
 <h1>Detalle del vehículo</h1>
 
-<p><strong>ID:</strong> <span th:text="${vehicle.id()}"></span></p>
-<p><strong>Placa:</strong> <span th:text="${vehicle.licensePlate()}"></span></p>
-<p><strong>Color de placa:</strong> <span th:text="${vehicle.plateColor()}"></span></p>
-<p><strong>Propietario:</strong> <span th:text="${vehicle.ownerName()}"></span></p>
-<p><strong>Documento:</strong> <span th:text="${vehicle.ownerDocument()}"></span></p>
-<p><strong>Teléfono:</strong> <span th:text="${vehicle.ownerPhone()}"></span></p>
-<p><strong>Modelo:</strong> <span th:text="${vehicle.modelName()}"></span></p>
-<p><strong>Marca:</strong> <span th:text="${vehicle.modelBrand()}"></span></p>
+<!-- Identificación del vehículo -->
+<h2>Información del vehículo</h2>
 
-<a th:href="@{/vehicles/{id}/edit(id=${vehicle.id()})}">Editar</a>
-<a th:href="@{/vehicles}">Volver al listado</a>
+<p>
+    <strong>ID:</strong>
+    <span th:text="${vehicle.id()}"></span>
+</p>
+
+<p>
+    <strong>Placa:</strong>
+    <span th:text="${vehicle.licensePlate()}"></span>
+</p>
+
+<p>
+    <strong>Color de placa:</strong>
+    <span th:text="${vehicle.plateColorLabel()}"></span>
+</p>
+
+<p>
+    <strong>Tipo de servicio:</strong>
+    <span th:text="${vehicle.serviceTypeLabel()}"></span>
+</p>
+
+<!-- Datos del modelo -->
+<h2>Modelo del vehículo</h2>
+
+<p>
+    <strong>Modelo:</strong>
+    <span th:text="${vehicle.modelName()}"></span>
+</p>
+
+<p>
+    <strong>Marca:</strong>
+    <span th:text="${vehicle.modelBrand()}"></span>
+</p>
+
+<!-- Datos del propietario -->
+<h2>Información del propietario</h2>
+
+<p>
+    <strong>Nombre:</strong>
+    <span th:text="${vehicle.ownerName()}"></span>
+</p>
+
+<p>
+    <strong>Documento:</strong>
+    <span th:text="${vehicle.ownerDocument()}"></span>
+</p>
+
+<p>
+    <strong>Teléfono:</strong>
+    <span th:text="${vehicle.ownerPhone()}"></span>
+</p>
+
+<!-- Acciones -->
+<a th:href="@{/vehicles/{id}/edit(id=${vehicle.id()})}">
+    Editar
+</a>
+
+<form sec:authorize="hasRole('ADMIN')"
+      th:action="@{/vehicles/{id}(id=${vehicle.id()})}"
+      method="post">
+
+    <input type="hidden"
+           name="_method"
+           value="delete">
+
+    <button type="submit">
+        Eliminar
+    </button>
+
+</form>
+
+<a th:href="@{/vehicles}">
+    Volver al listado
+</a>
+
 </body>
 </html>

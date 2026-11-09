@@ -2,21 +2,21 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Ubicación de la tienda - Taller</title>
+    <title>Ubicación de la taller - Taller</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
-<h1>Ubicación de la tienda</h1>
+<h1>Ubicación de la taller</h1>
 <p>Reparación <strong th:text="${'#' + repair.id() + ' - ' + repair.licensePlate()}"></strong>:
-    marque en el mapa dónde se compró el repuesto.</p>
+    marque en el mapa dónde se realizó la reparación.</p>
 
 <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
 
 <form method="post" th:action="@{/repairs/{id}/location(id=${repair.id()})}">
     <input type="hidden" name="_method" value="put">
 
-    <label for="workshopName">Nombre de la tienda</label>
+    <label for="workshopName">Nombre de la taller</label>
     <input type="text" id="workshopName" name="workshopName" maxlength="100" required
            th:value="${repair.workshopName()}">
 

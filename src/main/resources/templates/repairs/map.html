@@ -1,57 +1,145 @@
+
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
-    <title>Mapa de tiendas - Taller</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <title>Mapa de reparaciones - Taller</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 </head>
+
 <body>
-<h1>Mapa de tiendas</h1>
-<p>Tiendas donde se compraron los repuestos de las reparaciones. Haga clic en un punto para ver los datos.</p>
 
-<p th:if="${locations.isEmpty()}">
-    Aún no hay ubicaciones registradas. Se registran desde el detalle de cada reparación.</p>
+<div th:replace="~{fragments/nav :: nav}"></div>
 
-<div id="map" style="height: 500px;"></div>
+<h1>Ubicaciones de reparaciones</h1>
 
-<p><a th:href="@{/repairs}">Volver al historial</a></p>
+<p>
+    Consulte los lugares donde se realizaron las
+    reparaciones de un vehículo.
+</p>
 
+<!-- Buscar por placa -->
+<form method="get"
+      th:action="@{/repairs/map}">
+
+    <label for="plate">Placa del vehículo</label>
+
+    <input type="text"
+           id="plate"
+           name="plate"
+           placeholder="Ejemplo: SIW-234"
+           th:value="${plate}">
+
+    <button type="submit">
+        Buscar ubicaciones
+    </button>
+
+    <a th:href="@{/repairs/map}">
+        Ver todas
+    </a>
+
+</form>
+
+<!-- Resultado -->
+<h2>Mapa de ubicaciones</h2>
+
+<p th:if="${#lists.isEmpty(locations)}">
+    No se encontraron reparaciones con ubicación
+    registrada para esta búsqueda.
+</p>
+
+<p th:unless="${#lists.isEmpty(locations)}">
+    Ubicaciones registradas:
+    <strong th:text="${#lists.size(locations)}"></strong>
+</p>
+
+<!-- Mapa Leaflet -->
+<div id="repairHistoryMap"
+     style="height: 500px; width: 100%;">
+</div>
+
+<!-- Información para JavaScript -->
+<div id="locationsData" hidden>
+
+    <div class="location-point"
+         th:each="loc : ${locations}"
+
+         th:attr="data-id=${loc.repairId()},
+                  data-plate=${loc.licensePlate()},
+                  data-name=${loc.workshopName()},
+                  data-lat=${loc.latitude()},
+                  data-lng=${loc.longitude()},
+                  data-type=${loc.type()},
+                  data-status=${loc.status()}">
+    </div>
+
+</div>
+
+<!-- Lista de ubicaciones encontradas -->
+<h2>Historial de ubicaciones</h2>
+
+<p th:if="${#lists.isEmpty(locations)}">
+    No hay ubicaciones disponibles.
+</p>
+
+<table th:unless="${#lists.isEmpty(locations)}">
+
+    <thead>
+    <tr>
+        <th>Reparación</th>
+        <th>Placa</th>
+        <th>Taller</th>
+        <th>Latitud</th>
+        <th>Longitud</th>
+        <th>Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+
+    <tr th:each="loc : ${locations}">
+
+        <td th:text="${loc.repairId()}"></td>
+
+        <td th:text="${loc.licensePlate()}"></td>
+
+        <td th:text="${loc.workshopName()}"></td>
+
+        <td th:text="${loc.latitude()}"></td>
+
+        <td th:text="${loc.longitude()}"></td>
+
+        <td>
+            <a th:href="@{/repairs/{id}(id=${loc.repairId()})}">
+                Ver reparación
+            </a>
+        </td>
+
+    </tr>
+
+    </tbody>
+
+</table>
+
+<p>
+    <a th:href="@{/repairs}">
+        Volver al historial
+    </a>
+</p>
+
+<!-- Leaflet -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script th:inline="javascript">
-    const locations = /*[[${locations}]]*/ [];
 
-    const map = L.map('map').setView([4.5709, -74.2973], 6);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
+<!-- JavaScript del proyecto -->
+<script th:src="@{/js/repair-history-map.js}"></script>
 
-    const bounds = [];
-    locations.forEach(function (loc) {
-        const popup = document.createElement('div');
-
-        const title = document.createElement('strong');
-        title.textContent = loc.workshopName;
-        popup.appendChild(title);
-
-        const info = document.createElement('div');
-        info.textContent = 'Placa: ' + loc.licensePlate + ' | ' + loc.type + ' | ' + loc.status;
-        popup.appendChild(info);
-
-        const link = document.createElement('a');
-        link.href = '/repairs/' + loc.repairId;
-        link.textContent = 'Ver reparación';
-        popup.appendChild(link);
-
-        L.marker([loc.latitude, loc.longitude]).addTo(map).bindPopup(popup);
-        bounds.push([loc.latitude, loc.longitude]);
-    });
-
-    // Se ajusta el mapa para que se vean todos los puntos
-    if (bounds.length > 0) {
-        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
-    }
-</script>
 </body>
 </html>

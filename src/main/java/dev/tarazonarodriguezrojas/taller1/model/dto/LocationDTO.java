@@ -3,7 +3,7 @@ package dev.tarazonarodriguezrojas.taller1.model.dto;
 import dev.tarazonarodriguezrojas.taller1.model.constant.RepairStatus;
 
 /**
- * Un punto del mapa de tiendas (RF-28): dónde se compró el repuesto de una reparación.
+ * Un punto del mapa (RF-28): lugar donde se realizó una reparación.
  */
 public record LocationDTO(
         Integer repairId,
