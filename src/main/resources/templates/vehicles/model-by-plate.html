@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
 </head>
 <body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
 <h1>Buscar modelo por placa</h1>
 
 <form method="get" th:action="@{/vehicles/model-by-plate}">
