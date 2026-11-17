@@ -2,7 +2,9 @@
  * Interfaz común del taller:
  *  - RF-29: notificaciones Toast (éxito, error e información).
  *  - RF-30: modo claro / oscuro, recordado en el navegador.
- * Se carga desde templates/fragments/ui.html. No necesita librerías.
+ * Se carga desde templates/fragments/head.html. No necesita librerías.
+ *
+ * El modo se guarda en <html data-theme="light|dark">; los colores salen de theme.css.
  */
 (function () {
     'use strict';
@@ -33,11 +35,6 @@
 
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
-        // water.css tiene una hoja para cada modo: se cambia light.css <-> dark.css
-        var links = document.querySelectorAll('link[href*="water.css"]');
-        for (var i = 0; i < links.length; i++) {
-            links[i].href = links[i].href.replace(/\/(light|dark)\.css/, '/' + theme + '.css');
-        }
         var button = document.getElementById('theme-toggle');
         if (button) {
             button.textContent = theme === 'dark' ? 'Modo claro' : 'Modo oscuro';
@@ -45,17 +42,44 @@
         }
     }
 
-    function createThemeButton() {
-        var button = document.createElement('button');
-        button.id = 'theme-toggle';
-        button.type = 'button';
+    // Si la página tiene barra (fragments/nav.html) ya trae su botón; si no, se crea uno flotante
+    function setupThemeButton() {
+        var button = document.getElementById('theme-toggle');
+        if (!button) {
+            button = document.createElement('button');
+            button.id = 'theme-toggle';
+            button.type = 'button';
+            button.className = 'theme-toggle floating';
+            document.body.appendChild(button);
+        }
         button.addEventListener('click', function () {
             var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             saveTheme(next);
             applyTheme(next);
         });
-        document.body.appendChild(button);
         applyTheme(document.documentElement.getAttribute('data-theme') || readTheme());
+    }
+
+    // ---------- Enlace activo del menú ----------
+    function markActiveLink() {
+        var links = document.querySelectorAll('.menu a');
+        var path = window.location.pathname;
+        var best = null;
+        for (var i = 0; i < links.length; i++) {
+            var href = links[i].getAttribute('href');
+            if (!href) {
+                continue;
+            }
+            var linkPath = href.split('?')[0];
+            var matches = linkPath === '/' ? path === '/' : (path === linkPath || path.indexOf(linkPath + '/') === 0);
+            // Gana el enlace más específico (la ruta más larga que coincide)
+            if (matches && (best === null || linkPath.length > best.path.length)) {
+                best = { link: links[i], path: linkPath };
+            }
+        }
+        if (best) {
+            best.link.setAttribute('aria-current', 'page');
+        }
     }
 
     // ---------- Toast (RF-29) ----------
@@ -82,7 +106,7 @@
         close.type = 'button';
         close.className = 'toast-close';
         close.setAttribute('aria-label', 'Cerrar notificación');
-        close.textContent = '\u00d7';
+        close.textContent = '×';
 
         function dismiss() {
             toast.classList.add('toast-hide');
@@ -104,7 +128,7 @@
 
     // Quita el mensaje de texto simple que la página ya mostraba, para no repetirlo
     function removeInlineMessage(message) {
-        var paragraphs = document.querySelectorAll('body > p');
+        var paragraphs = document.querySelectorAll('body p');
         for (var i = 0; i < paragraphs.length; i++) {
             if (paragraphs[i].textContent.trim() === message) {
                 paragraphs[i].parentNode.removeChild(paragraphs[i]);
@@ -146,11 +170,12 @@
     // Permite lanzar un toast desde cualquier script: taller.toast('success', 'Listo')
     window.taller = { toast: showToast };
 
-    // El tema se aplica ya (antes de que cargue el resto) para evitar el parpadeo
-    applyTheme(readTheme());
+    // El tema ya lo dejó puesto el script de fragments/head.html; aquí se confirma por si acaso
+    applyTheme(document.documentElement.getAttribute('data-theme') || readTheme());
 
     document.addEventListener('DOMContentLoaded', function () {
-        createThemeButton();
+        setupThemeButton();
+        markActiveLink();
         showServerMessages();
     });
 })();
