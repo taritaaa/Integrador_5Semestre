@@ -1,6 +1,15 @@
+<<<<<<< HEAD
    .gradle/
    build/
    .idea/
    uploads/
    data/
    src/main/resources/application-locgit al.properties
+=======
+.gradle/
+build/
+.idea/
+uploads/
+data/
+src/main/resources/application-local.properties
+>>>>>>> 0e1a47ea2666b4d645ffd45136827702145e237d

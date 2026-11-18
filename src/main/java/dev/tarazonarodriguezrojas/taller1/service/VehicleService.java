@@ -175,7 +175,7 @@ public class VehicleService {
         vehicle.setPlateColor(plateColor);
         vehicle.setOwnerName(request.ownerName().trim());
         vehicle.setOwnerDocument(request.ownerDocument().trim());
-        vehicle.setOwnerPhone(request.ownerPhone().trim());
+        vehicle.setOwnerPhone(PhoneValidation.validate(request.ownerPhone()));
         vehicle.setModel(model);
     }
 

@@ -36,8 +36,20 @@
         <p><strong>Correo:</strong> <span th:text="${user.email()}"></span></p>
     </div>
 
-    <label for="phone">Teléfono</label>
-    <input type="text" id="phone" name="phone" maxlength="20" required th:value="${user.phone()}">
+    <label for="phoneCountry">País e indicativo del celular</label>
+    <select id="phoneCountry" class="phone-country" required>
+        <option value="+57">Colombia (+57)</option>
+        <option value="+52">México (+52)</option>
+        <option value="+1">Estados Unidos / Canadá (+1)</option>
+        <option value="+34">España (+34)</option>
+        <option value="+56">Chile (+56)</option>
+        <option value="+51">Perú (+51)</option>
+    </select>
+    <label for="phoneLocal">Número de celular</label>
+    <input id="phoneLocal" class="phone-local" type="tel" inputmode="numeric" required
+           placeholder="3001234567" pattern="[0-9]+">
+    <input type="hidden" id="phone" name="phone" th:value="${user.phone()}">
+    <small>Se guardará el número completo con indicativo, por ejemplo +573001234567.</small>
 
     <label for="role">Rol</label>
     <select id="role" name="role" required>
@@ -57,5 +69,6 @@
     <button type="submit">Guardar</button>
     <a th:href="@{/users}">Cancelar</a>
 </form>
+<script th:src="@{/js/phone-validation.js}"></script>
 </body>
 </html>
