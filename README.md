@@ -197,3 +197,6 @@ Más detalle y prioridades: [`docs/DIAGNOSTICO_PENDIENTES.md`](docs/DIAGNOSTICO_
 ---
 
 **Mantenimiento de esta documentación:** actualizar cada estado en la matriz solamente después de ejecutar el caso de prueba y registrar su resultado. **No se ha modificado código de aplicación en esta entrega documental.**
+
+
+prueba
