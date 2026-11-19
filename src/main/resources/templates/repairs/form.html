@@ -1,87 +1,193 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Reparación - Taller</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-</head>
+<head th:replace="~{fragments/head :: head(${repair.id() == null} ? 'Registrar reparación' : 'Editar reparación')}"></head>
 <body>
 <div th:replace="~{fragments/nav :: nav}"></div>
 
-<h1 th:text="${repair.id() == null} ? 'Registrar reparación' : 'Editar reparación'"></h1>
+<main class="page-shell">
+    <div class="form-card">
+        <div class="page-header">
+            <div class="page-header-copy">
+                <div class="breadcrumb">
+                    <a th:href="@{/}">Inicio</a>
+                    <span>/</span>
+                    <a th:href="@{/repairs}">Reparaciones</a>
+                    <span>/</span>
+                    <span th:text="${repair.id() == null} ? 'Nueva' : 'Editar #' + ${repair.id()}"></span>
+                </div>
+                <h1 th:text="${repair.id() == null} ? 'Registrar reparación' : 'Editar reparación'">Registrar reparación</h1>
+                <p th:text="${repair.id() == null}
+                    ? 'Crea una nueva orden de trabajo. El descuento o devolución de stock se gestiona automáticamente.'
+                    : 'Actualiza el tipo de intervención, estado de avance o valor de mano de obra.'"></p>
+            </div>
+        </div>
 
-<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
-<p th:if="${repair.id() == null and vehicles.isEmpty()}">
-    Primero debe registrar un vehículo en <a th:href="@{/vehicles/new}">Vehículos</a>.</p>
-<p th:if="${repair.id() == null and mechanics.isEmpty()}">No hay mecánicos activos disponibles.</p>
+        <p class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
 
-<form method="post"
-      th:action="${repair.id() == null} ? @{/repairs} : @{/repairs/{id}(id=${repair.id()})}">
-    <input type="hidden" name="_method" value="put" th:if="${repair.id() != null}">
+        <div class="alert alert-warning" th:if="${repair.id() == null and vehicles.isEmpty()}">
+            Primero debe registrar un vehículo en <a th:href="@{/vehicles/new}">Vehículos</a>.
+        </div>
 
-    <!-- ===== Solo al registrar: fecha, vehículo, mecánico y repuesto ===== -->
-    <div th:if="${repair.id() == null}">
-        <label for="date">Fecha</label>
-        <input type="date" id="date" name="date" required th:value="${repair.date()}">
+        <div class="alert alert-warning" th:if="${repair.id() == null and mechanics.isEmpty()}">
+            No hay mecánicos activos disponibles para asignar a la reparación.
+        </div>
 
-        <label for="vehicleId">Vehículo</label>
-        <select id="vehicleId" name="vehicleId" required>
-            <option value="">Seleccione</option>
-            <option th:each="v : ${vehicles}" th:value="${v.id()}"
-                    th:text="${v.licensePlate() + ' - ' + v.modelName() + ' ' + v.modelBrand()}"
-                    th:selected="${repair.vehicleId() == v.id()}"></option>
-        </select>
+        <section class="card">
+            <form method="post"
+                  th:action="${repair.id() == null} ? @{/repairs} : @{/repairs/{id}(id=${repair.id()})}">
+                <input type="hidden" name="_method" value="put" th:if="${repair.id() != null}">
 
-        <label for="mechanicId">Mecánico</label>
-        <select id="mechanicId" name="mechanicId" required>
-            <option value="">Seleccione</option>
-            <option th:each="m : ${mechanics}" th:value="${m.id()}" th:text="${m.name()}"
-                    th:selected="${repair.mechanicId() == m.id()}"></option>
-        </select>
+                <!-- ===== Solo al editar: resumen de datos inmutables ===== -->
+                <div class="readonly-summary" th:if="${repair.id() != null}">
+                    <div class="readonly-summary-item">
+                        <span>Fecha</span>
+                        <strong class="mono" th:text="${repair.date()}"></strong>
+                    </div>
+                    <div class="readonly-summary-item">
+                        <span>Vehículo</span>
+                        <strong class="mono" th:text="${repair.licensePlate()}"></strong>
+                    </div>
+                    <div class="readonly-summary-item">
+                        <span>Mecánico</span>
+                        <strong th:text="${repair.mechanicName()}"></strong>
+                    </div>
+                    <div class="readonly-summary-item" th:if="${repair.partId() != null}">
+                        <span>Repuesto asignado</span>
+                        <strong th:text="${repair.partName() + ' × ' + repair.quantity()}"></strong>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <!-- ===== Solo al registrar: fecha, vehículo y mecánico ===== -->
+                    <th:block th:if="${repair.id() == null}">
+                        <div class="form-section-title">Asignación de la orden</div>
+
+                        <div class="form-group">
+                            <label for="date">Fecha de ingreso</label>
+                            <input type="date" id="date" name="date" class="mono" required th:value="${repair.date()}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mechanicId">Mecánico asignado</label>
+                            <select id="mechanicId" name="mechanicId" required>
+                                <option value="">Seleccione un mecánico</option>
+                                <option th:each="m : ${mechanics}"
+                                        th:value="${m.id()}"
+                                        th:text="${m.name()}"
+                                        th:selected="${repair.mechanicId() == m.id()}"></option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="vehicleId">Vehículo</label>
+                            <select id="vehicleId" name="vehicleId" required>
+                                <option value="">Seleccione un vehículo</option>
+                                <option th:each="v : ${vehicles}"
+                                        th:value="${v.id()}"
+                                        th:text="${v.licensePlate() + ' - ' + v.modelName() + ' ' + v.modelBrand()}"
+                                        th:selected="${repair.vehicleId() == v.id()}"></option>
+                            </select>
+                        </div>
+                    </th:block>
+
+                    <!-- ===== Siempre: tipo, estado y costo de mano de obra ===== -->
+                    <div class="form-section-title">Detalle técnico y costos</div>
+
+                    <div class="form-group full">
+                        <label for="type">Tipo de reparación</label>
+                        <input type="text"
+                               id="type"
+                               name="type"
+                               maxlength="100"
+                               placeholder="Ej: Cambio de pastillas de freno, Sincronización, Cambio de aceite"
+                               required
+                               th:value="${repair.type()}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">Estado</label>
+                        <select id="status" name="status" required>
+                            <option th:each="s : ${statuses}"
+                                    th:value="${s}"
+                                    th:text="${s}"
+                                    th:selected="${repair.status() == s}"></option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="laborCost">Costo de mano de obra (COP)</label>
+                        <input type="number"
+                               id="laborCost"
+                               name="laborCost"
+                               class="mono"
+                               min="0"
+                               step="0.01"
+                               placeholder="0.00"
+                               required
+                               th:value="${repair.laborCost()}">
+                    </div>
+
+                    <!-- ===== Solo al registrar: repuesto opcional ===== -->
+                    <th:block th:if="${repair.id() == null}">
+                        <div class="form-section-title">Repuesto utilizado (opcional)</div>
+
+                        <div class="form-group">
+                            <label for="partId">Repuesto del inventario</label>
+                            <select id="partId" name="partId">
+                                <option value="">Sin repuesto</option>
+                                <option th:each="p : ${parts}"
+                                        th:value="${p.id()}"
+                                        th:text="${p.name() + ' (' + p.modelName() + ' ' + p.modelBrand() + ') - stock: ' + p.stock()}"
+                                        th:selected="${repair.partId() == p.id()}"></option>
+                            </select>
+                            <span class="form-hint">Debe ser compatible con el modelo del vehículo y contar con stock suficiente.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quantity">Cantidad del repuesto</label>
+                            <input type="number"
+                                   id="quantity"
+                                   name="quantity"
+                                   class="mono"
+                                   min="1"
+                                   step="1"
+                                   placeholder="Ej: 1"
+                                   th:value="${repair.quantity()}">
+                            <span class="form-hint">Obligatorio solo si seleccionas un repuesto.</span>
+                        </div>
+                    </th:block>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn">Guardar reparación</button>
+                    <a class="btn btn-secondary" th:href="@{/repairs}">Cancelar</a>
+                </div>
+            </form>
+        </section>
     </div>
+</main>
 
-    <!-- ===== Solo al editar: datos que no se modifican ===== -->
-    <div th:if="${repair.id() != null}">
-        <p><strong>Fecha:</strong> <span th:text="${repair.date()}"></span></p>
-        <p><strong>Vehículo:</strong> <span th:text="${repair.licensePlate()}"></span></p>
-        <p><strong>Mecánico:</strong> <span th:text="${repair.mechanicName()}"></span></p>
-        <p th:if="${repair.partId() != null}">
-            <strong>Repuesto:</strong>
-            <span th:text="${repair.partName() + ' x ' + repair.quantity()}"></span>
-        </p>
-    </div>
+<script th:if="${repair.id() == null}">
+    (function () {
+        var partSelect = document.getElementById('partId');
+        var qtyInput = document.getElementById('quantity');
+        if (!partSelect || !qtyInput) return;
 
-    <!-- ===== Siempre: tipo, estado y costo de mano de obra ===== -->
-    <label for="type">Tipo de reparación</label>
-    <input type="text" id="type" name="type" maxlength="100" required th:value="${repair.type()}">
+        function syncQuantity() {
+            var hasPart = partSelect.value !== '';
+            qtyInput.required = hasPart;
+            qtyInput.disabled = !hasPart;
+            if (hasPart && !qtyInput.value) {
+                qtyInput.value = '1';
+            }
+            if (!hasPart) {
+                qtyInput.value = '';
+            }
+        }
 
-    <label for="status">Estado</label>
-    <select id="status" name="status" required>
-        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
-                th:selected="${repair.status() == s}"></option>
-    </select>
-
-    <label for="laborCost">Costo de mano de obra</label>
-    <input type="number" id="laborCost" name="laborCost" min="0" step="0.01" required
-           th:value="${repair.laborCost()}">
-
-    <!-- ===== Solo al registrar: repuesto opcional ===== -->
-    <div th:if="${repair.id() == null}">
-        <label for="partId">Repuesto (opcional)</label>
-        <select id="partId" name="partId">
-            <option value="">Sin repuesto</option>
-            <option th:each="p : ${parts}" th:value="${p.id()}"
-                    th:text="${p.name() + ' (' + p.modelName() + ' ' + p.modelBrand() + ') - stock: ' + p.stock()}"
-                    th:selected="${repair.partId() == p.id()}"></option>
-        </select>
-        <small>Debe ser compatible con el modelo del vehículo y tener stock suficiente.</small>
-
-        <label for="quantity">Cantidad del repuesto</label>
-        <input type="number" id="quantity" name="quantity" min="1" step="1" th:value="${repair.quantity()}">
-    </div>
-
-    <button type="submit">Guardar</button>
-    <a th:href="@{/repairs}">Cancelar</a>
-</form>
+        partSelect.addEventListener('change', syncQuantity);
+        syncQuantity();
+    })();
+</script>
 </body>
 </html>

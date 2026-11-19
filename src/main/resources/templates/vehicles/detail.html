@@ -1,25 +1,82 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Detalle del vehículo - Taller</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-</head>
+<head th:replace="~{fragments/head :: head('Detalle del vehículo')}"></head>
 <body>
 <div th:replace="~{fragments/nav :: nav}"></div>
 
-<h1>Detalle del vehículo</h1>
+<main class="page-shell">
+    <div class="page-header">
+        <div class="page-header-copy">
+            <div class="breadcrumb">
+                <a th:href="@{/}">Inicio</a>
+                <span>/</span>
+                <a th:href="@{/vehicles}">Vehículos</a>
+                <span>/</span>
+                <span th:text="${vehicle.licensePlate()}">Detalle</span>
+            </div>
+            <h1>Detalle del vehículo</h1>
+            <p th:text="${vehicle.modelBrand() + ' ' + vehicle.modelName()}"></p>
+        </div>
 
-<p><strong>ID:</strong> <span th:text="${vehicle.id()}"></span></p>
-<p><strong>Placa:</strong> <span th:text="${vehicle.licensePlate()}"></span></p>
-<p><strong>Color de placa:</strong> <span th:text="${vehicle.plateColor()}"></span></p>
-<p><strong>Propietario:</strong> <span th:text="${vehicle.ownerName()}"></span></p>
-<p><strong>Documento:</strong> <span th:text="${vehicle.ownerDocument()}"></span></p>
-<p><strong>Teléfono:</strong> <span th:text="${vehicle.ownerPhone()}"></span></p>
-<p><strong>Modelo:</strong> <span th:text="${vehicle.modelName()}"></span></p>
-<p><strong>Marca:</strong> <span th:text="${vehicle.modelBrand()}"></span></p>
+        <div class="page-actions">
+            <a class="btn btn-secondary" th:href="@{/vehicles}">&larr; Volver al listado</a>
+            <a class="btn" th:href="@{/vehicles/{id}/edit(id=${vehicle.id()})}">Editar vehículo</a>
+        </div>
+    </div>
 
-<a th:href="@{/vehicles/{id}/edit(id=${vehicle.id()})}">Editar</a>
-<a th:href="@{/vehicles}">Volver al listado</a>
+    <div class="grid-2">
+        <!-- Identificación del vehículo -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Identificación</h2>
+                <span class="colombia-plate colombia-plate-lg"
+                      th:attr="data-plate-color=${vehicle.plateColor()}"
+                      th:text="${vehicle.licensePlate()}"></span>
+            </div>
+
+            <dl class="detail-grid">
+                <div class="detail-item">
+                    <dt>ID de registro</dt>
+                    <dd class="mono" th:text="'#' + ${vehicle.id()}"></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Color de placa</dt>
+                    <dd th:text="${vehicle.plateColor()}"></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Marca</dt>
+                    <dd th:text="${vehicle.modelBrand()}"></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Modelo</dt>
+                    <dd th:text="${vehicle.modelName()}"></dd>
+                </div>
+            </dl>
+        </section>
+
+        <!-- Datos del propietario -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Propietario</h2>
+                <span class="badge badge-info">Titular</span>
+            </div>
+
+            <dl class="detail-grid">
+                <div class="detail-item">
+                    <dt>Nombre completo</dt>
+                    <dd th:text="${vehicle.ownerName()}"></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Documento de identidad</dt>
+                    <dd class="mono" th:text="${vehicle.ownerDocument()}"></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Teléfono de contacto</dt>
+                    <dd class="mono" th:text="${vehicle.ownerPhone()}"></dd>
+                </div>
+            </dl>
+        </section>
+    </div>
+</main>
 </body>
 </html>

@@ -1,75 +1,80 @@
-
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Modelo - Taller</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-</head>
+<head th:replace="~{fragments/head :: head(${vehicleModel.id() == null} ? 'Registrar modelo' : 'Editar modelo')}"></head>
 <body>
-
 <div th:replace="~{fragments/nav :: nav}"></div>
 
-<h1 th:text="${vehicleModel.id() == null} ? 'Registrar modelo' : 'Editar modelo'">
-    Registrar modelo
-</h1>
+<main class="page-shell">
+    <div class="form-card">
+        <div class="page-header">
+            <div class="page-header-copy">
+                <div class="breadcrumb">
+                    <a th:href="@{/}">Inicio</a>
+                    <span>/</span>
+                    <a th:href="@{/models}">Modelos</a>
+                    <span>/</span>
+                    <span th:text="${vehicleModel.id() == null} ? 'Nuevo' : 'Editar'"></span>
+                </div>
+                <h1 th:text="${vehicleModel.id() == null} ? 'Registrar modelo' : 'Editar modelo'">Registrar modelo</h1>
+                <p>Define la marca, línea y categoría para aplicar las reglas de placa correspondientes.</p>
+            </div>
+        </div>
 
-<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+        <p class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
 
-<form method="post"
-      th:action="${vehicleModel.id() == null} ? @{/models} : @{/models/{id}(id=${vehicleModel.id()})}">
+        <section class="card">
+            <form method="post"
+                  th:action="${vehicleModel.id() == null} ? @{/models} : @{/models/{id}(id=${vehicleModel.id()})}">
 
-    <input type="hidden"
-           name="_method"
-           value="put"
-           th:if="${vehicleModel.id() != null}">
+                <input type="hidden" name="_method" value="put" th:if="${vehicleModel.id() != null}">
 
-    <!-- Nombre del modelo -->
-    <label for="name">Nombre</label>
-    <input type="text"
-           id="name"
-           name="name"
-           maxlength="100"
-           required
-           th:value="${vehicleModel.name()}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="brand">Marca</label>
+                        <input type="text"
+                               id="brand"
+                               name="brand"
+                               maxlength="100"
+                               placeholder="Ej: Toyota, Renault, Yamaha"
+                               required
+                               autofocus
+                               th:value="${vehicleModel.brand()}">
+                    </div>
 
-    <!-- Marca del modelo -->
-    <label for="brand">Marca</label>
-    <input type="text"
-           id="brand"
-           name="brand"
-           maxlength="100"
-           required
-           th:value="${vehicleModel.brand()}">
+                    <div class="form-group">
+                        <label for="name">Nombre del modelo</label>
+                        <input type="text"
+                               id="name"
+                               name="name"
+                               maxlength="100"
+                               placeholder="Ej: Corolla, Duster, MT-03"
+                               required
+                               th:value="${vehicleModel.name()}">
+                    </div>
 
-    <!-- Tipo de vehículo -->
-    <label for="vehicleType">Tipo de vehículo</label>
-    <select id="vehicleType"
-            name="vehicleType"
-            required>
+                    <div class="form-group full">
+                        <label for="vehicleType">Tipo de vehículo</label>
+                        <select id="vehicleType" name="vehicleType" required>
+                            <option value="">Seleccione una categoría</option>
+                            <option th:each="t : ${vehicleTypes}"
+                                    th:value="${t}"
+                                    th:text="${t.label()}"
+                                    th:selected="${vehicleModel.vehicleType() == t}">
+                            </option>
+                        </select>
+                        <span class="form-hint">
+                            El tipo de vehículo determina el formato de placa. El tipo de servicio se selecciona al registrar cada vehículo.
+                        </span>
+                    </div>
+                </div>
 
-        <option value="">Seleccione</option>
-
-        <option th:each="t : ${vehicleTypes}"
-                th:value="${t}"
-                th:text="${t.label()}"
-                th:selected="${vehicleModel.vehicleType() == t}">
-        </option>
-
-    </select>
-
-    <small>
-        El tipo de vehículo determina el formato de placa.
-        El tipo de servicio se selecciona al registrar el vehículo.
-    </small>
-
-    <div>
-        <button type="submit">Guardar</button>
-        <a th:href="@{/models}">Cancelar</a>
+                <div class="form-actions">
+                    <button type="submit" class="btn">Guardar modelo</button>
+                    <a class="btn btn-secondary" th:href="@{/models}">Cancelar</a>
+                </div>
+            </form>
+        </section>
     </div>
-
-</form>
-
+</main>
 </body>
 </html>

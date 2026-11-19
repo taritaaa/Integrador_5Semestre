@@ -1503,3 +1503,630 @@ input:-webkit-autofill:focus {
     border-radius: 0;
     box-shadow: none;
 }
+
+/* ==========================================================================
+   Fase 4: Modelos, Vehículos, Filtros, Fichas de Detalle y Placas CO
+   ========================================================================== */
+
+/* Barra de filtros en listados */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.9rem 1rem;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.filter-field {
+    flex: 1 1 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+/* Ficha de detalle (pares etiqueta/valor) */
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem 1.5rem;
+    margin: 0;
+}
+
+.detail-item {
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+}
+
+.detail-item dt {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-soft);
+    margin-bottom: 0.3rem;
+}
+
+.detail-item dd {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--text);
+    word-break: break-word;
+}
+
+/* Contenedor centrado para formularios y búsquedas */
+.form-card {
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+.form-section-title {
+    grid-column: 1 / -1;
+    margin: 0.4rem 0 0.1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-soft);
+}
+
+.form-section-title:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.phone-group {
+    display: grid;
+    grid-template-columns: minmax(170px, 0.95fr) 1.4fr;
+    gap: 0.75rem;
+}
+
+/* Placas colombianas automáticas por texto/enum en data-plate-color */
+.colombia-plate[data-plate-color*="AMARILL" i],
+.colombia-plate[data-plate-color*="YELLOW" i] {
+    background: #facc15;
+    color: #0f172a;
+    border-color: #1e293b;
+}
+
+.colombia-plate[data-plate-color*="BLANC" i],
+.colombia-plate[data-plate-color*="WHITE" i] {
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #1e293b;
+}
+
+.colombia-plate[data-plate-color*="AZUL" i],
+.colombia-plate[data-plate-color*="BLUE" i] {
+    background: #1d4ed8;
+    color: #ffffff;
+    border-color: #dbeafe;
+}
+
+.colombia-plate[data-plate-color*="VERD" i],
+.colombia-plate[data-plate-color*="GREEN" i] {
+    background: #15803d;
+    color: #ffffff;
+    border-color: #dcfce7;
+}
+
+.colombia-plate[data-plate-color*="ROJ" i],
+.colombia-plate[data-plate-color*="RED" i] {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #fee2e2;
+}
+
+.colombia-plate-lg {
+    font-size: 1.35rem;
+    padding: 0.42rem 1rem;
+    border-width: 3px;
+    border-radius: 10px;
+    letter-spacing: 0.12em;
+}
+
+.plate-preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-subtle);
+    border: 1px dashed var(--border-strong);
+}
+
+.plate-preview-label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.inline-delete-form {
+    margin: 0;
+    display: inline-flex;
+}
+
+/* Buscador por placa (model-by-plate.html) */
+.lookup-search {
+    display: flex;
+    gap: 0.75rem;
+    align-items: stretch;
+}
+
+.lookup-search input {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.format-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.85rem;
+}
+
+.format-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.65rem;
+    border-radius: var(--radius-pill);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    font-size: 0.76rem;
+    color: var(--text-muted);
+}
+
+.format-chip strong {
+    font-family: var(--font-mono);
+    color: var(--text);
+}
+
+.result-highlight {
+    margin-top: 1.35rem;
+    border-left: 4px solid var(--primary);
+    animation: fadeSlideUp 260ms var(--ease) both;
+}
+
+@media (max-width: 680px) {
+    .phone-group,
+    .lookup-search {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+    }
+}
+
+/* ==========================================================================
+   Fase 5: Repuestos (EAN, Precios, Imágenes, Stock) y Usuarios (Credenciales)
+   ========================================================================== */
+
+.price-tag {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.ean-code {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.5rem;
+    border-radius: 6px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* Detalle de repuesto con columna de ficha + vitrina de imagen */
+.part-detail-layout {
+    display: grid;
+    grid-template-columns: 1.35fr 0.95fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.part-image-stage {
+    width: 100%;
+    min-height: 240px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg-subtle);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow: hidden;
+    text-align: center;
+    color: var(--text-soft);
+}
+
+.part-image-stage img {
+    max-height: 290px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+.file-dropzone {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--border-strong);
+    background: var(--bg-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.file-dropzone input[type="file"] {
+    width: 100%;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.file-dropzone input[type="file"]::file-selector-button {
+    margin-right: 0.75rem;
+    padding: 0.42rem 0.8rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
+    background: var(--bg-elevated);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+}
+
+.file-dropzone input[type="file"]::file-selector-button:hover {
+    background: var(--bg-hover);
+}
+
+.preview-thumb {
+    display: none;
+    max-height: 150px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    object-fit: contain;
+    margin-top: 0.25rem;
+}
+
+.preview-thumb.is-visible {
+    display: block;
+}
+
+/* Banner de contraseña temporal (users/list.html) */
+.secret-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.15rem 1.35rem;
+    margin-bottom: 1.35rem;
+    border-radius: var(--radius-md);
+    background: var(--warning-soft);
+    border: 1px solid rgba(217, 119, 6, 0.35);
+    border-left: 4px solid var(--warning);
+    animation: fadeSlideUp 280ms var(--ease) both;
+}
+
+.secret-banner-copy {
+    flex: 1 1 320px;
+}
+
+.secret-banner-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+}
+
+.secret-banner-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.secret-code-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.65rem 0.45rem 0.9rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-sm);
+}
+
+.secret-code-box code {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text);
+}
+
+/* Identidad visual de usuario */
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+.user-avatar-lg {
+    width: 48px;
+    height: 48px;
+    font-size: 1.15rem;
+    border-radius: 14px;
+}
+
+@media (max-width: 900px) {
+    .part-detail-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================================
+   Fase 6: Reparaciones, Badges de Estado, Resumen de Costos y Mapas Leaflet
+   ========================================================================== */
+
+/* Badges automáticos según RepairStatus (en español o enum en inglés) */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.24rem 0.68rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.status-badge[data-status*="PEND" i] {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.status-badge[data-status*="PROG" i],
+.status-badge[data-status*="PROCES" i],
+.status-badge[data-status*="CURSO" i] {
+    background: var(--info-soft);
+    color: var(--info);
+}
+
+.status-badge[data-status*="PROG" i]::before,
+.status-badge[data-status*="PROCES" i]::before,
+.status-badge[data-status*="CURSO" i]::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulseDot 1.6s ease-in-out infinite;
+}
+
+.status-badge[data-status*="COMPLET" i],
+.status-badge[data-status*="FINALIZ" i],
+.status-badge[data-status*="TERMIN" i],
+.status-badge[data-status*="ENTREG" i] {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.status-badge[data-status*="CANCEL" i] {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+/* Recibo / Desglose financiero en detalle de reparación */
+.cost-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.cost-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px dashed var(--border);
+    font-size: 0.92rem;
+}
+
+.cost-row-label {
+    color: var(--text-muted);
+}
+
+.cost-row-sub {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-soft);
+}
+
+.cost-total-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.25rem;
+    padding: 0.95rem 1.05rem;
+    border-radius: var(--radius-sm);
+    background: var(--primary-soft);
+    border: 1px solid rgba(29, 78, 216, 0.22);
+}
+
+.cost-total-row span:first-child {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.cost-total-amount {
+    font-family: var(--font-mono);
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Contenedores y herramientas de Mapas Leaflet */
+.map-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.85rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+}
+
+.coords-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.map-canvas {
+    width: 100%;
+    height: 430px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    z-index: 1;
+}
+
+.map-canvas-sm {
+    height: 240px;
+}
+
+.map-canvas-lg {
+    height: 540px;
+}
+
+/* Popups de Leaflet estilizados con el sistema de diseño */
+.leaflet-popup-content-wrapper {
+    background: var(--bg-elevated) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.leaflet-popup-tip {
+    background: var(--bg-elevated) !important;
+}
+
+.leaflet-popup-content {
+    margin: 0.85rem 1rem !important;
+    font-family: var(--font-sans);
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+
+.map-popup-title {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+}
+
+.map-popup-meta {
+    color: var(--text-muted);
+    margin-bottom: 0.55rem;
+}
+
+.map-popup-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 700;
+    color: var(--primary) !important;
+}
+
+/* Resumen de solo lectura al editar una reparación */
+.readonly-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1.15rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+}
+
+.readonly-summary-item span {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-soft);
+}
+
+.readonly-summary-item strong {
+    font-size: 0.92rem;
+    color: var(--text);
+}
+
+@media (max-width: 720px) {
+    .map-canvas-lg {
+        height: 400px;
+    }
+}

@@ -1,52 +1,159 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Detalle de la reparación - Taller</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <th:block th:replace="~{fragments/head :: head('Detalle de reparación')}"></th:block>
+    <link rel="stylesheet" th:if="${repair.workshopLatitude() != null and repair.workshopLongitude() != null}"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
 <div th:replace="~{fragments/nav :: nav}"></div>
 
-<h1>Detalle de la reparación</h1>
+<main class="page-shell">
+    <div class="page-header">
+        <div class="page-header-copy">
+            <div class="breadcrumb">
+                <a th:href="@{/}">Inicio</a>
+                <span>/</span>
+                <a th:href="@{/repairs}">Reparaciones</a>
+                <span>/</span>
+                <span th:text="'#' + ${repair.id()}">Detalle</span>
+            </div>
+            <h1 th:text="'Orden de reparación #' + ${repair.id()}">Detalle de la reparación</h1>
+            <p th:text="${repair.type()}"></p>
+        </div>
 
-<p th:if="${successMessage}" th:text="${successMessage}"></p>
-<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+        <div class="page-actions">
+            <a class="btn btn-secondary" th:href="@{/repairs}">&larr; Volver al historial</a>
+            <a class="btn btn-secondary" th:href="@{/repairs/{id}/location(id=${repair.id()})}">
+                <span th:text="${repair.workshopName() != null} ? 'Cambiar ubicación' : 'Registrar ubicación'"></span>
+            </a>
+            <a class="btn" th:href="@{/repairs/{id}/edit(id=${repair.id()})}">Editar reparación</a>
+        </div>
+    </div>
 
-<p><strong>ID:</strong> <span th:text="${repair.id()}"></span></p>
-<p><strong>Fecha:</strong> <span th:text="${repair.date()}"></span></p>
-<p><strong>Vehículo:</strong>
-    <a th:href="@{/vehicles/{id}(id=${repair.vehicleId()})}" th:text="${repair.licensePlate()}"></a></p>
-<p><strong>Tipo:</strong> <span th:text="${repair.type()}"></span></p>
-<p><strong>Estado:</strong> <span th:text="${repair.status()}"></span></p>
-<p><strong>Mecánico:</strong> <span th:text="${repair.mechanicName()}"></span></p>
+    <p class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></p>
+    <p class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
 
-<h2>Costos</h2>
-<p><strong>Mano de obra:</strong>
-    <span th:text="${'$ ' + #numbers.formatDecimal(repair.laborCost(), 1, 'POINT', 2, 'COMMA')}"></span></p>
-<div th:if="${repair.partId() != null}">
-    <p><strong>Repuesto:</strong>
-        <a th:href="@{/parts/{id}(id=${repair.partId()})}" th:text="${repair.partName()}"></a></p>
-    <p><strong>Cantidad:</strong> <span th:text="${repair.quantity()}"></span></p>
-    <p><strong>Precio unitario (al momento de usarlo):</strong>
-        <span th:text="${'$ ' + #numbers.formatDecimal(repair.unitPrice(), 1, 'POINT', 2, 'COMMA')}"></span></p>
-</div>
-<p th:if="${repair.partId() == null}">Esta reparación no usó repuestos.</p>
-<p><strong>Costo total:</strong>
-    <span th:text="${'$ ' + #numbers.formatDecimal(repair.totalCost(), 1, 'POINT', 2, 'COMMA')}"></span></p>
+    <div class="grid-2" style="margin-bottom: 1.25rem;">
+        <!-- Datos de la orden -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Información general</h2>
+                <span class="status-badge"
+                      th:attr="data-status=${repair.status()}"
+                      th:text="${repair.status()}"></span>
+            </div>
 
-<h2>Tienda donde se compró el repuesto</h2>
-<div th:if="${repair.workshopName() != null}">
-    <p><strong>Nombre:</strong> <span th:text="${repair.workshopName()}"></span></p>
-    <p><strong>Coordenadas:</strong>
-        <span th:text="${repair.workshopLatitude() + ', ' + repair.workshopLongitude()}"></span></p>
-</div>
-<p th:if="${repair.workshopName() == null}">Aún no se ha registrado la ubicación.</p>
+            <dl class="detail-grid">
+                <div class="detail-item">
+                    <dt>ID de orden</dt>
+                    <dd class="mono" th:text="'#' + ${repair.id()}"></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Fecha</dt>
+                    <dd class="mono" th:text="${repair.date()}"></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Vehículo</dt>
+                    <dd>
+                        <a th:href="@{/vehicles/{id}(id=${repair.vehicleId()})}" style="text-decoration: none;">
+                            <span class="colombia-plate" th:text="${repair.licensePlate()}"></span>
+                        </a>
+                    </dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Mecánico responsable</dt>
+                    <dd th:text="${repair.mechanicName()}"></dd>
+                </div>
+                <div class="detail-item" style="grid-column: 1 / -1;">
+                    <dt>Tipo de reparación</dt>
+                    <dd th:text="${repair.type()}"></dd>
+                </div>
+            </dl>
+        </section>
 
-<p>
-    <a th:href="@{/repairs/{id}/location(id=${repair.id()})}">Registrar ubicación en el mapa</a> |
-    <a th:href="@{/repairs/{id}/edit(id=${repair.id()})}">Editar</a> |
-    <a th:href="@{/repairs}">Volver al historial</a>
-</p>
+        <!-- Desglose de costos -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Resumen de costos</h2>
+                <span class="badge badge-neutral">COP</span>
+            </div>
+
+            <div class="cost-breakdown">
+                <div class="cost-row">
+                    <div>
+                        <span class="cost-row-label">Mano de obra</span>
+                        <span class="cost-row-sub">Servicio técnico de taller</span>
+                    </div>
+                    <span class="price-tag"
+                          th:text="${'$ ' + #numbers.formatDecimal(repair.laborCost(), 1, 'POINT', 2, 'COMMA')}"></span>
+                </div>
+
+                <div class="cost-row" th:if="${repair.partId() != null}">
+                    <div>
+                        <a th:href="@{/parts/{id}(id=${repair.partId()})}" style="font-weight: 600;"
+                           th:text="${repair.partName()}"></a>
+                        <span class="cost-row-sub">
+                            Cantidad: <strong th:text="${repair.quantity()}"></strong> &middot;
+                            Precio histórico unitario:
+                            <span class="mono"
+                                  th:text="${'$ ' + #numbers.formatDecimal(repair.unitPrice(), 1, 'POINT', 2, 'COMMA')}"></span>
+                        </span>
+                    </div>
+                    <span class="badge badge-info" th:text="'x' + ${repair.quantity()}"></span>
+                </div>
+
+                <div class="cost-row" th:if="${repair.partId() == null}">
+                    <span class="cost-row-label">Repuestos utilizados</span>
+                    <span class="badge badge-neutral">Sin repuestos</span>
+                </div>
+
+                <div class="cost-total-row">
+                    <span>Costo total de la reparación</span>
+                    <span class="cost-total-amount"
+                          th:text="${'$ ' + #numbers.formatDecimal(repair.totalCost(), 1, 'POINT', 2, 'COMMA')}"></span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Ubicación de compra del repuesto (RF-28) -->
+    <section class="card">
+        <div class="card-header">
+            <h2>Tienda donde se compró el repuesto</h2>
+            <a class="btn btn-secondary btn-sm" th:href="@{/repairs/{id}/location(id=${repair.id()})}">
+                <span th:text="${repair.workshopName() != null} ? 'Actualizar punto en el mapa' : '+ Registrar ubicación'"></span>
+            </a>
+        </div>
+
+        <div th:if="${repair.workshopName() != null}">
+            <div class="map-toolbar">
+                <div>
+                    <strong th:text="${repair.workshopName()}"></strong>
+                </div>
+                <span class="coords-pill"
+                      th:text="${repair.workshopLatitude() + ', ' + repair.workshopLongitude()}"></span>
+            </div>
+
+            <!-- Usa static/js/repair-detail-map.js -->
+            <div th:if="${repair.workshopLatitude() != null and repair.workshopLongitude() != null}"
+                 id="repairDetailMap"
+                 class="map-canvas map-canvas-sm"
+                 th:attr="data-lat=${repair.workshopLatitude()},data-lng=${repair.workshopLongitude()}">
+            </div>
+        </div>
+
+        <div class="empty-state" style="padding: 1.75rem 1rem;" th:if="${repair.workshopName() == null}">
+            <h3>Aún no se ha registrado la ubicación</h3>
+            <p>Marca en el mapa la tienda o almacén donde se adquirió el repuesto para llevar trazabilidad.</p>
+            <a class="btn btn-sm" th:href="@{/repairs/{id}/location(id=${repair.id()})}">Registrar ubicación en el mapa</a>
+        </div>
+    </section>
+</main>
+
+<script th:if="${repair.workshopLatitude() != null and repair.workshopLongitude() != null}"
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script th:if="${repair.workshopLatitude() != null and repair.workshopLongitude() != null}"
+        th:src="@{/js/repair-detail-map.js}" defer></script>
 </body>
 </html>
