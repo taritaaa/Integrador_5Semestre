@@ -42,7 +42,8 @@ public class SecurityConfig {
                                 antMatcher("/access-denied"),
                                 antMatcher("/error"),
                                 antMatcher("/css/**"),
-                                antMatcher("/js/**")).permitAll()
+                                antMatcher("/js/**"),
+                                antMatcher("/images/**")).permitAll()
 
                         // Solo administrador: usuarios y consola de la base de datos
                         .requestMatchers(antMatcher("/users/**"), antMatcher("/h2-console/**")).hasRole(ADMIN)
