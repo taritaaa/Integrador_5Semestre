@@ -1,89 +1,190 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
-    <title>Inicio - Taller</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-</head>
+<head th:replace="~{fragments/head :: head('Inicio')}"></head>
 <body>
 <div th:replace="~{fragments/nav :: nav}"></div>
 
-<h1>Sistema de Gestión del Taller</h1>
+<main class="page-shell">
+    <!-- Banner de bienvenida y accesos rápidos -->
+    <section class="hero-banner" aria-label="Resumen de bienvenida">
+        <div>
+            <span class="hero-eyebrow">
+                <span sec:authorize="hasRole('ADMIN')">Perfil Administrador</span>
+                <span sec:authorize="hasRole('MECHANIC') and !hasRole('ADMIN')">Perfil Mecánico</span>
+            </span>
+            <h1>Sistema de Gestión del Taller</h1>
+            <p>
+                Bienvenido, <strong sec:authentication="name"></strong>.
+                Selecciona un módulo operativo o inicia una acción rápida.
+            </p>
+        </div>
 
-<p>Bienvenido, <strong sec:authentication="name"></strong>.
-    Su rol: <strong sec:authorize="hasRole('ADMIN')">Administrador</strong><strong sec:authorize="hasRole('MECHANIC')">Mecánico</strong>.
-    Selecciona una opción para comenzar:</p>
+        <div class="hero-quick-actions">
+            <a class="btn btn-accent" th:href="@{/repairs/new}">+ Nueva reparación</a>
+            <a class="btn btn-hero-light" th:href="@{/vehicles/new}">+ Nuevo vehículo</a>
+            <a class="btn btn-hero-light" th:href="@{/vehicles/model-by-plate}">Consultar placa</a>
+        </div>
+    </section>
 
-<!-- ============ MÓDULOS DISPONIBLES ============ -->
+    <!-- ============ MÓDULOS DISPONIBLES ============ -->
+    <div class="section-title">
+        <h2>Módulos del sistema</h2>
+        <span>Acceso adaptado automáticamente a tus permisos</span>
+    </div>
 
-<h2>Catálogo</h2>
-<h3>Modelos de vehículo</h3>
-<ul>
-    <li><a th:href="@{/models}">Listado de modelos</a> (consultar y ver detalle<span sec:authorize="hasRole('ADMIN')">, editar y eliminar</span>)</li>
-    <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/models/new}">Registrar nuevo modelo</a></li>
-</ul>
+    <section class="modules-grid" aria-label="Módulos operativos">
+        <!-- Reparaciones -->
+        <article class="module-card">
+            <div class="module-head">
+                <span class="module-icon orange" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                    </svg>
+                </span>
+                <div class="module-meta">
+                    <h3>Reparaciones</h3>
+                    <p>Órdenes de trabajo, cálculo automático de costos, control de stock y ubicaciones de compra.</p>
+                </div>
+            </div>
+            <ul class="module-links">
+                <li><a th:href="@{/repairs}"><span>Historial de reparaciones</span><span class="arrow">&rarr;</span></a></li>
+                <li><a th:href="@{/repairs/new}"><span>Registrar nueva reparación</span><span class="arrow">&rarr;</span></a></li>
+                <li><a th:href="@{/repairs/map}"><span>Mapa de tiendas de repuestos</span><span class="arrow">&rarr;</span></a></li>
+            </ul>
+        </article>
 
-<h2>Vehículos</h2>
-<ul>
-    <li><a th:href="@{/vehicles}">Listado de vehículos</a> (filtrar por placa o propietario, ver detalle, editar<span sec:authorize="hasRole('ADMIN')"> y eliminar</span>)</li>
-    <li><a th:href="@{/vehicles/new}">Registrar nuevo vehículo</a></li>
-    <li><a th:href="@{/vehicles/model-by-plate}">Buscar modelo y marca por placa</a></li>
-</ul>
+        <!-- Vehículos -->
+        <article class="module-card">
+            <div class="module-head">
+                <span class="module-icon blue" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+                        <circle cx="7" cy="17" r="2"/>
+                        <path d="M9 17h6"/>
+                        <circle cx="17" cy="17" r="2"/>
+                    </svg>
+                </span>
+                <div class="module-meta">
+                    <h3>Vehículos</h3>
+                    <p>Registro con validación de placas colombianas, filtros por propietario y consulta rápida.</p>
+                </div>
+            </div>
+            <ul class="module-links">
+                <li><a th:href="@{/vehicles}"><span>Listado de vehículos</span><span class="arrow">&rarr;</span></a></li>
+                <li><a th:href="@{/vehicles/new}"><span>Registrar nuevo vehículo</span><span class="arrow">&rarr;</span></a></li>
+                <li><a th:href="@{/vehicles/model-by-plate}"><span>Buscar modelo y marca por placa</span><span class="arrow">&rarr;</span></a></li>
+            </ul>
+        </article>
 
-<h2>Repuestos</h2>
-<ul>
-    <li><a th:href="@{/parts}">Listado de repuestos</a> (consultar y ver detalle con imagen<span sec:authorize="hasRole('ADMIN')">, editar y eliminar</span>)</li>
-    <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/parts/new}">Registrar nuevo repuesto</a></li>
-    <li><a th:href="@{/parts/compatible}">Buscar repuestos compatibles con un modelo</a></li>
-</ul>
+        <!-- Repuestos -->
+        <article class="module-card">
+            <div class="module-head">
+                <span class="module-icon green" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                        <path d="m3.3 7 8.7 5 8.7-5"/>
+                        <path d="M12 22V12"/>
+                    </svg>
+                </span>
+                <div class="module-meta">
+                    <h3>Repuestos e Inventario</h3>
+                    <p>Catálogo con códigos EAN, existencias, fotografías de referencia y compatibilidad.</p>
+                </div>
+            </div>
+            <ul class="module-links">
+                <li><a th:href="@{/parts}"><span>Listado de repuestos</span><span class="arrow">&rarr;</span></a></li>
+                <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/parts/new}"><span>Registrar nuevo repuesto</span><span class="arrow">&rarr;</span></a></li>
+                <li><a th:href="@{/parts/compatible}"><span>Buscar compatibles por modelo</span><span class="arrow">&rarr;</span></a></li>
+            </ul>
+        </article>
 
-<h2>Reparaciones</h2>
-<ul>
-    <li><a th:href="@{/repairs}">Historial de reparaciones</a> (filtrar por placa o estado, ver costo total, editar<span sec:authorize="hasRole('ADMIN')"> y eliminar</span>)</li>
-    <li><a th:href="@{/repairs/new}">Registrar nueva reparación</a></li>
-    <li><a th:href="@{/repairs/map}">Mapa de tiendas donde se compraron los repuestos</a></li>
-</ul>
+        <!-- Modelos de vehículo -->
+        <article class="module-card">
+            <div class="module-head">
+                <span class="module-icon cyan" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="7" height="7" x="3" y="3" rx="1"/>
+                        <rect width="7" height="7" x="14" y="3" rx="1"/>
+                        <rect width="7" height="7" x="14" y="14" rx="1"/>
+                        <rect width="7" height="7" x="3" y="14" rx="1"/>
+                    </svg>
+                </span>
+                <div class="module-meta">
+                    <h3>Catálogo de Modelos</h3>
+                    <p>Marcas, líneas y especificaciones base para asociar vehículos y repuestos compatibles.</p>
+                </div>
+            </div>
+            <ul class="module-links">
+                <li><a th:href="@{/models}"><span>Listado de modelos</span><span class="arrow">&rarr;</span></a></li>
+                <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/models/new}"><span>Registrar nuevo modelo</span><span class="arrow">&rarr;</span></a></li>
+            </ul>
+        </article>
 
-<div sec:authorize="hasRole('ADMIN')">
-    <h2>Usuarios</h2>
-    <ul>
-        <li><a th:href="@{/users}">Listado de usuarios</a> (consultar, editar y desactivar cuentas)</li>
-        <li><a th:href="@{/users/new}">Registrar nuevo usuario</a></li>
-    </ul>
-</div>
+        <!-- Usuarios (Solo ADMIN) -->
+        <article class="module-card" sec:authorize="hasRole('ADMIN')">
+            <div class="module-head">
+                <span class="module-icon amber" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </span>
+                <div class="module-meta">
+                    <h3>Usuarios y Roles</h3>
+                    <p>Administración de mecánicos y administradores, contraseñas temporales y estado de cuentas.</p>
+                </div>
+            </div>
+            <ul class="module-links">
+                <li><a th:href="@{/users}"><span>Listado de usuarios</span><span class="arrow">&rarr;</span></a></li>
+                <li><a th:href="@{/users/new}"><span>Registrar nuevo usuario</span><span class="arrow">&rarr;</span></a></li>
+            </ul>
+        </article>
+    </section>
 
-
-
-<!-- ============ MAPA DE AVANCE POR REQUISITO ============ -->
-
-<h2>Avance del proyecto</h2>
-<table>
-    <thead>
-    <tr>
-        <th>Módulo</th>
-        <th>Requisitos</th>
-        <th>Estado</th>
-        <th>Ruta</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr><td>Sesión: iniciar y cerrar</td><td>RF-01, RF-02</td><td>Listo</td><td><code>/login</code></td></tr>
-    <tr><td>Recuperar y restablecer contraseña</td><td>RF-03, RF-04</td><td>Listo</td><td><code>/forgot-password</code></td></tr>
-    <tr><td>Control de acceso por rol</td><td>RF-05</td><td>Listo</td><td>-</td></tr>
-    <tr><td>Usuarios</td><td>RF-06, RF-07</td><td>Listo</td><td><code>/users</code></td></tr>
-    <tr><td>Modelos</td><td>RF-08, RF-09, RF-10, RF-11</td><td>Listo</td><td><code>/models</code></td></tr>
-    <tr><td>Vehículos</td><td>RF-12, RF-13, RF-14, RF-15</td><td>Listo</td><td><code>/vehicles</code></td></tr>
-    <tr><td>Repuestos</td><td>RF-16, RF-17, RF-18, RF-19</td><td>Listo</td><td><code>/parts</code></td></tr>
-    <tr><td>Imagen de referencia del repuesto</td><td>RF-20</td><td>Listo</td><td><code>/parts/{id}</code></td></tr>
-    <tr><td>Reparaciones</td><td>RF-21, RF-22, RF-23, RF-24</td><td>Listo</td><td><code>/repairs</code></td></tr>
-    <tr><td>Stock automático</td><td>RF-25</td><td>Listo (dentro de reparaciones)</td><td><code>/repairs</code></td></tr>
-    <tr><td>Repuestos compatibles con un modelo</td><td>RF-26</td><td>Listo</td><td><code>/parts/compatible</code></td></tr>
-    <tr><td>Búsqueda de modelo por placa</td><td>RF-27</td><td>Listo</td><td><code>/vehicles/model-by-plate</code></td></tr>
-    <tr><td>Ubicación de la tienda en el mapa</td><td>RF-28</td><td>Listo</td><td><code>/repairs/map</code></td></tr>
-    <tr><td>Notificaciones Toast</td><td>RF-29</td><td>Listo</td><td>-</td></tr>
-    <tr><td>Modo claro y oscuro</td><td>RF-30</td><td>Listo (botón abajo a la derecha)</td><td>-</td></tr>
-    </tbody>
-</table>
+    <!-- ============ MAPA DE AVANCE POR REQUISITO (DESPLEGABLE PARA SUSTENTACIÓN) ============ -->
+    <details class="rf-panel">
+        <summary>
+            <span class="rf-summary-left">
+                <span>Matriz de cobertura funcional (RF-01 a RF-30)</span>
+                <span class="badge badge-success">30 / 30 Listos</span>
+            </span>
+            <span class="rf-summary-hint">Clic para ver detalle</span>
+        </summary>
+        <div class="rf-panel-body">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Módulo</th>
+                        <th>Requisitos</th>
+                        <th>Estado</th>
+                        <th>Ruta</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr><td>Sesión: iniciar y cerrar</td><td class="mono">RF-01, RF-02</td><td><span class="badge badge-success">Listo</span></td><td><code>/login</code></td></tr>
+                    <tr><td>Recuperar y restablecer contraseña</td><td class="mono">RF-03, RF-04</td><td><span class="badge badge-success">Listo</span></td><td><code>/forgot-password</code></td></tr>
+                    <tr><td>Control de acceso por rol</td><td class="mono">RF-05</td><td><span class="badge badge-success">Listo</span></td><td>-</td></tr>
+                    <tr><td>Usuarios</td><td class="mono">RF-06, RF-07</td><td><span class="badge badge-success">Listo</span></td><td><code>/users</code></td></tr>
+                    <tr><td>Modelos</td><td class="mono">RF-08, RF-09, RF-10, RF-11</td><td><span class="badge badge-success">Listo</span></td><td><code>/models</code></td></tr>
+                    <tr><td>Vehículos</td><td class="mono">RF-12, RF-13, RF-14, RF-15</td><td><span class="badge badge-success">Listo</span></td><td><code>/vehicles</code></td></tr>
+                    <tr><td>Repuestos</td><td class="mono">RF-16, RF-17, RF-18, RF-19</td><td><span class="badge badge-success">Listo</span></td><td><code>/parts</code></td></tr>
+                    <tr><td>Imagen de referencia del repuesto</td><td class="mono">RF-20</td><td><span class="badge badge-success">Listo</span></td><td><code>/parts/{id}</code></td></tr>
+                    <tr><td>Reparaciones</td><td class="mono">RF-21, RF-22, RF-23, RF-24</td><td><span class="badge badge-success">Listo</span></td><td><code>/repairs</code></td></tr>
+                    <tr><td>Stock automático</td><td class="mono">RF-25</td><td><span class="badge badge-success">Listo (en reparaciones)</span></td><td><code>/repairs</code></td></tr>
+                    <tr><td>Repuestos compatibles con un modelo</td><td class="mono">RF-26</td><td><span class="badge badge-success">Listo</span></td><td><code>/parts/compatible</code></td></tr>
+                    <tr><td>Búsqueda de modelo por placa</td><td class="mono">RF-27</td><td><span class="badge badge-success">Listo</span></td><td><code>/vehicles/model-by-plate</code></td></tr>
+                    <tr><td>Ubicación de la tienda en el mapa</td><td class="mono">RF-28</td><td><span class="badge badge-success">Listo</span></td><td><code>/repairs/map</code></td></tr>
+                    <tr><td>Notificaciones Toast</td><td class="mono">RF-29</td><td><span class="badge badge-success">Listo</span></td><td>-</td></tr>
+                    <tr><td>Modo claro y oscuro</td><td class="mono">RF-30</td><td><span class="badge badge-success">Listo (barra superior)</span></td><td>-</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+</main>
 </body>
 </html>

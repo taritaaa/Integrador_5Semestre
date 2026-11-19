@@ -2,7 +2,7 @@
  * Interfaz común del taller:
  *  - RF-29: notificaciones Toast (éxito, error e información).
  *  - RF-30: modo claro / oscuro, recordado en el navegador.
- * Se carga desde templates/fragments/head.html. No necesita librerías.
+ *  - Menú responsivo, enlace activo y protección contra doble envío en formularios.
  *
  * El modo se guarda en <html data-theme="light|dark">; los colores salen de theme.css.
  */
@@ -37,8 +37,15 @@
         document.documentElement.setAttribute('data-theme', theme);
         var button = document.getElementById('theme-toggle');
         if (button) {
-            button.textContent = theme === 'dark' ? 'Modo claro' : 'Modo oscuro';
-            button.setAttribute('aria-label', theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+            var labelText = theme === 'dark' ? 'Modo claro' : 'Modo oscuro';
+            button.setAttribute('aria-label', 'Cambiar a ' + labelText.toLowerCase());
+            button.setAttribute('title', 'Cambiar a ' + labelText.toLowerCase());
+            var labelSpan = button.querySelector('.theme-label');
+            if (labelSpan) {
+                labelSpan.textContent = theme === 'dark' ? 'Claro' : 'Oscuro';
+            } else {
+                button.textContent = labelText;
+            }
         }
     }
 
@@ -60,6 +67,25 @@
         applyTheme(document.documentElement.getAttribute('data-theme') || readTheme());
     }
 
+    // ---------- Menú móvil ----------
+    function setupMobileMenu() {
+        var toggle = document.getElementById('nav-toggle');
+        var menu = document.getElementById('main-menu');
+        if (!toggle || !menu) {
+            return;
+        }
+        toggle.addEventListener('click', function () {
+            var isOpen = menu.classList.toggle('is-open');
+            toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+        document.addEventListener('click', function (ev) {
+            if (menu.classList.contains('is-open') && !menu.contains(ev.target) && !toggle.contains(ev.target)) {
+                menu.classList.remove('is-open');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
     // ---------- Enlace activo del menú ----------
     function markActiveLink() {
         var links = document.querySelectorAll('.menu a');
@@ -72,7 +98,6 @@
             }
             var linkPath = href.split('?')[0];
             var matches = linkPath === '/' ? path === '/' : (path === linkPath || path.indexOf(linkPath + '/') === 0);
-            // Gana el enlace más específico (la ruta más larga que coincide)
             if (matches && (best === null || linkPath.length > best.path.length)) {
                 best = { link: links[i], path: linkPath };
             }
@@ -95,11 +120,18 @@
     }
 
     function showToast(type, message) {
+        var duration = type === 'error' ? 8000 : 5000;
         var toast = document.createElement('div');
         toast.className = 'toast toast-' + type;
         toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        toast.style.setProperty('--toast-duration', duration + 'ms');
+
+        var badge = document.createElement('span');
+        badge.className = 'toast-dot';
+        badge.setAttribute('aria-hidden', 'true');
 
         var text = document.createElement('span');
+        text.className = 'toast-message';
         text.textContent = message; // textContent: nunca se interpreta como HTML
 
         var close = document.createElement('button');
@@ -108,25 +140,33 @@
         close.setAttribute('aria-label', 'Cerrar notificación');
         close.textContent = '×';
 
+        var progress = document.createElement('span');
+        progress.className = 'toast-progress';
+
+        var dismissed = false;
         function dismiss() {
+            if (dismissed) {
+                return;
+            }
+            dismissed = true;
             toast.classList.add('toast-hide');
             setTimeout(function () {
                 if (toast.parentNode) {
                     toast.parentNode.removeChild(toast);
                 }
-            }, 300);
+            }, 260);
         }
 
         close.addEventListener('click', dismiss);
+        toast.appendChild(badge);
         toast.appendChild(text);
         toast.appendChild(close);
+        toast.appendChild(progress);
         container().appendChild(toast);
 
-        // Los errores duran más para que se alcancen a leer
-        setTimeout(dismiss, type === 'error' ? 8000 : 5000);
+        setTimeout(dismiss, duration);
     }
 
-    // Quita el mensaje de texto simple que la página ya mostraba, para no repetirlo
     function removeInlineMessage(message) {
         var paragraphs = document.querySelectorAll('body p');
         for (var i = 0; i < paragraphs.length; i++) {
@@ -167,15 +207,33 @@
         }
     }
 
+    // ---------- Prevención de doble envío en formularios ----------
+    function setupFormSubmitGuard() {
+        document.addEventListener('submit', function (ev) {
+            var form = ev.target;
+            if (!form || form.method.toLowerCase() !== 'post' || form.dataset.noGuard === 'true') {
+                return;
+            }
+            var submitBtn = form.querySelector('button[type="submit"]:not([disabled]), input[type="submit"]:not([disabled])');
+            if (submitBtn && !form.classList.contains('logout-form')) {
+                submitBtn.classList.add('is-loading');
+                setTimeout(function () {
+                    submitBtn.disabled = true;
+                }, 0);
+            }
+        });
+    }
+
     // Permite lanzar un toast desde cualquier script: taller.toast('success', 'Listo')
     window.taller = { toast: showToast };
 
-    // El tema ya lo dejó puesto el script de fragments/head.html; aquí se confirma por si acaso
     applyTheme(document.documentElement.getAttribute('data-theme') || readTheme());
 
     document.addEventListener('DOMContentLoaded', function () {
         setupThemeButton();
+        setupMobileMenu();
         markActiveLink();
         showServerMessages();
+        setupFormSubmitGuard();
     });
 })();

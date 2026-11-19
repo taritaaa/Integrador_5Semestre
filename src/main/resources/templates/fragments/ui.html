@@ -2,10 +2,11 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block th:fragment="ui">
-    <link rel="stylesheet" th:href="@{/css/ui.css}">
+    <!-- Carga theme.css para compatibilidad con vistas que aún no usan fragments/head -->
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
     <div id="toast-data" hidden
          th:attr="data-success=${successMessage},data-error=${errorMessage},data-info=${infoMessage}"></div>
-    <script th:src="@{/js/ui.js}"></script>
+    <script th:src="@{/js/ui.js}" defer></script>
 </th:block>
 </body>
 </html>
