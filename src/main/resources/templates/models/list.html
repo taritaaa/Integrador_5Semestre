@@ -10,19 +10,9 @@
 
 <main class="app-main fade-in">
 
-    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
-        <a th:href="@{/}">Panel</a>
-        <span class="breadcrumb-sep">//</span>
-        <span>Modelos de Vehículo</span>
-    </nav>
-
     <header class="page-header">
         <div>
-            <div class="page-eyebrow">MOD // 04 • Catálogo Base</div>
             <h1 class="page-title">Modelos de Vehículo</h1>
-            <p class="page-subtitle">
-                Marcas, líneas y formato normativo de placa para vehículos registrados y repuestos compatibles.
-            </p>
         </div>
         <div class="page-actions" sec:authorize="hasRole('ADMIN')">
             <a th:href="@{/models/new}" class="btn btn-accent">
