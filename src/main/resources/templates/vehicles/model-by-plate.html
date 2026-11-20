@@ -8,21 +8,10 @@
 
 <main class="app-main fade-in">
 
-    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
-        <a th:href="@{/}">Panel</a>
-        <span class="breadcrumb-sep">//</span>
-        <a th:href="@{/vehicles}">Vehículos</a>
-        <span class="breadcrumb-sep">//</span>
-        <span>Consulta por Placa</span>
-    </nav>
-
     <header class="page-header">
         <div>
             <div class="page-eyebrow">Telemetría Rápida // RF-27</div>
             <h1 class="page-title">Consultar Modelo por Placa</h1>
-            <p class="page-subtitle">
-                Ingresa una placa registrada en Veloxa Service para identificar al instante su marca, modelo y tipo de placa.
-            </p>
         </div>
         <div class="page-actions">
             <a th:href="@{/vehicles}" class="btn btn-ghost">← Volver a Vehículos</a>

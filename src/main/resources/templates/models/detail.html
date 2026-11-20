@@ -13,16 +13,14 @@
     <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
         <a th:href="@{/}">Panel</a>
         <span class="breadcrumb-sep">//</span>
-        <a th:href="@{/models}">Modelos</a>
+        <a th:href="@{/models}">Modelo</a>
         <span class="breadcrumb-sep">//</span>
         <span th:text="'#' + ${vehicleModel.id()}">#1</span>
     </nav>
 
     <header class="page-header">
         <div>
-            <div class="page-eyebrow">Ficha Técnica // Modelo</div>
             <h1 class="page-title" th:text="${vehicleModel.brand() + ' ' + vehicleModel.name()}">Toyota Corolla</h1>
-            <p class="page-subtitle">Especificación base y formato normativo de placa asignado.</p>
         </div>
         <div class="page-actions">
             <a th:href="@{/models}" class="btn btn-ghost">← Listado</a>
@@ -70,7 +68,6 @@
         </section>
 
         <aside class="neo-card">
-            <div class="form-section-title" style="margin-top: 0;">Accesos Relacionados</div>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 <a th:href="@{/parts/compatible(modelId=${vehicleModel.id()})}" class="btn btn-primary" style="width: 100%;">
                     Ver Repuestos Compatibles →

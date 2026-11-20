@@ -13,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * - Registra el interceptor que obliga a cambiar la contraseña temporal.
  */
 @Configuration
-public class WebConfig implements WebMvcConfigurer {
+public class WebConfig implements WebMvcConfigurer {    
 
     private final FileStorageService fileStorage;
     private final PasswordChangeInterceptor passwordChangeInterceptor;

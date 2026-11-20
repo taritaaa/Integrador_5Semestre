@@ -8,23 +8,11 @@
 
 <main class="app-main fade-in">
 
-    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
-        <a th:href="@{/}">Panel</a>
-        <span class="breadcrumb-sep">//</span>
-        <a th:href="@{/users}">Usuarios</a>
-        <span class="breadcrumb-sep">//</span>
-        <span th:text="${user.id() != null ? 'Editar #' + user.id() : 'Nuevo Usuario'}">Formulario</span>
-    </nav>
-
     <header class="page-header">
         <div>
-            <div class="page-eyebrow">MOD // 05 • Control de Acceso RBAC</div>
             <h1 class="page-title" th:text="${user.id() != null ? 'Editar Usuario' : 'Registrar Nuevo Usuario'}">
                 Registrar Nuevo Usuario
             </h1>
-            <p class="page-subtitle" th:if="${user.id() == null}">
-                Al guardar, Veloxa Service generará una contraseña temporal única que el usuario deberá cambiar en su primer ingreso.
-            </p>
             <p class="page-subtitle" th:if="${user.id() != null}">
                 Actualiza datos de contacto, rol o estado de activación. El documento y correo son inmutables.
             </p>
@@ -39,7 +27,7 @@
               method="post">
             <input th:if="${user.id() != null}" type="hidden" name="_method" value="put">
 
-            <div class="form-section-title">1. Identidad del Colaborador</div>
+            <div class="form-section-title">Identidad del Colaborador</div>
 
             <div class="form-grid">
                 <div class="form-group full-width">

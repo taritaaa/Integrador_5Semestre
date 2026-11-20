@@ -8,21 +8,9 @@
 
 <main class="app-main fade-in">
 
-    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
-        <a th:href="@{/}">Panel</a>
-        <span class="breadcrumb-sep">//</span>
-        <a th:href="@{/repairs}">Reparaciones</a>
-        <span class="breadcrumb-sep">//</span>
-        <span>Mapa Interactivo</span>
-    </nav>
-
     <header class="page-header">
         <div>
-            <div class="page-eyebrow">Telemetría Geográfica // RF-28</div>
             <h1 class="page-title">Mapa de Reparaciones y Tiendas</h1>
-            <p class="page-subtitle">
-                Visualiza los puntos georreferenciados de cada intervención registrada y filtra por placa.
-            </p>
         </div>
         <div class="page-actions">
             <a th:href="@{/repairs}" class="btn btn-ghost">← Listado de Órdenes</a>

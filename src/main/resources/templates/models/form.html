@@ -8,23 +8,12 @@
 
 <main class="app-main fade-in">
 
-    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
-        <a th:href="@{/}">Panel</a>
-        <span class="breadcrumb-sep">//</span>
-        <a th:href="@{/models}">Modelos</a>
-        <span class="breadcrumb-sep">//</span>
-        <span th:text="${vehicleModel.id() != null ? 'Editar #' + vehicleModel.id() : 'Nuevo Registro'}">Formulario</span>
-    </nav>
-
     <header class="page-header">
         <div>
             <div class="page-eyebrow">MOD // 04 • Administración de Catálogo</div>
             <h1 class="page-title" th:text="${vehicleModel.id() != null ? 'Editar Modelo Vehicular' : 'Registrar Nuevo Modelo'}">
                 Registrar Nuevo Modelo
             </h1>
-            <p class="page-subtitle">
-                Define la marca, línea y tipo de vehículo. El tipo determina automáticamente el formato normativo de placa.
-            </p>
         </div>
         <div class="page-actions">
             <a th:href="@{/models}" class="btn btn-ghost">← Volver al Listado</a>
@@ -64,7 +53,6 @@
                                 th:text="${t.label() + ' — Ej: ' + t.plateExample()}"
                                 th:selected="${vehicleModel.vehicleType() == t}"></option>
                     </select>
-                    <span class="form-hint">El servicio (particular, público, oficial) y color de placa se asignan al registrar cada vehículo.</span>
                 </div>
             </div>
 

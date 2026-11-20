@@ -18,9 +18,7 @@
 
     <header class="page-header">
         <div>
-            <div class="page-eyebrow">Perfil de Personal // Veloxa</div>
             <h1 class="page-title" th:text="${user.name()}">Usuario</h1>
-            <p class="page-subtitle">Credenciales de rol, contacto y estado de habilitación.</p>
         </div>
         <div class="page-actions">
             <a th:href="@{/users}" class="btn btn-ghost">← Listado</a>
@@ -76,7 +74,6 @@
         </section>
 
         <aside class="neo-card">
-            <div class="form-section-title" style="margin-top: 0;">Gestión Rápida</div>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 <a th:href="@{/users/{id}/edit(id=${user.id()})}" class="btn btn-accent" style="width: 100%;">
                     Editar Rol / Estado

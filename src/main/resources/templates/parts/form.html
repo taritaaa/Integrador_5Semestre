@@ -11,20 +11,16 @@
     <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
         <a th:href="@{/}">Panel</a>
         <span class="breadcrumb-sep">//</span>
-        <a th:href="@{/parts}">Repuestos</a>
+        <a th:href="@{/parts}">Repuesto</a>
         <span class="breadcrumb-sep">//</span>
         <span th:text="${part.id() != null ? 'Editar #' + part.id() : 'Nuevo Repuesto'}">Formulario</span>
     </nav>
 
     <header class="page-header">
         <div>
-            <div class="page-eyebrow">MOD // 03 • Catálogo Técnico</div>
             <h1 class="page-title" th:text="${part.id() != null ? 'Editar Repuesto' : 'Registrar Nuevo Repuesto'}">
                 Registrar Nuevo Repuesto
             </h1>
-            <p class="page-subtitle">
-                Configura código EAN, precio unitario, stock disponible y compatibilidad con el catálogo de modelos.
-            </p>
         </div>
         <div class="page-actions">
             <a th:href="@{/parts}" class="btn btn-ghost">← Volver al Inventario</a>

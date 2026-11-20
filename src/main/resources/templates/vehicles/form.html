@@ -8,23 +8,11 @@
 
 <main class="app-main fade-in">
 
-    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
-        <a th:href="@{/}">Panel</a>
-        <span class="breadcrumb-sep">//</span>
-        <a th:href="@{/vehicles}">Vehículos</a>
-        <span class="breadcrumb-sep">//</span>
-        <span th:text="${vehicle.id() != null ? 'Editar ' + vehicle.licensePlate() : 'Nuevo Vehículo'}">Formulario</span>
-    </nav>
-
     <header class="page-header">
         <div>
-            <div class="page-eyebrow">MOD // 02 • Normativa Colombiana</div>
             <h1 class="page-title" th:text="${vehicle.id() != null ? 'Editar Vehículo' : 'Registrar Nuevo Vehículo'}">
                 Registrar Nuevo Vehículo
             </h1>
-            <p class="page-subtitle">
-                Vista previa en vivo y validación automática de formato y color de placa según modelo y servicio.
-            </p>
         </div>
         <div class="page-actions">
             <a th:href="@{/vehicles}" class="btn btn-ghost">← Volver al Listado</a>
@@ -37,9 +25,6 @@
         <div class="plate-showcase">
             <div>
                 <div class="spec-label">Vista Previa de Placa</div>
-                <div style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 0.2rem;">
-                    Se actualiza automáticamente según el modelo y el tipo de servicio.
-                </div>
             </div>
             <span id="platePreview"
                   class="plate-badge"

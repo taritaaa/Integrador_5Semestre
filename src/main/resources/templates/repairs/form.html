@@ -8,23 +8,11 @@
 
 <main class="app-main fade-in">
 
-    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
-        <a th:href="@{/}">Panel</a>
-        <span class="breadcrumb-sep">//</span>
-        <a th:href="@{/repairs}">Reparaciones</a>
-        <span class="breadcrumb-sep">//</span>
-        <span th:text="${repair.id() != null ? 'Editar #' + repair.id() : 'Nueva Orden'}">Formulario</span>
-    </nav>
-
     <header class="page-header">
         <div>
-            <div class="page-eyebrow">MOD // 01 • Gestión Transaccional</div>
             <h1 class="page-title" th:text="${repair.id() != null ? 'Editar Reparación #' + repair.id() : 'Registrar Nueva Reparación'}">
                 Registrar Nueva Reparación
             </h1>
-            <p class="page-subtitle">
-                Los repuestos se filtran automáticamente según el modelo del vehículo seleccionado y su stock se descuenta de forma transaccional.
-            </p>
         </div>
         <div class="page-actions">
             <a th:href="@{/repairs}" class="btn btn-ghost">← Volver al Historial</a>

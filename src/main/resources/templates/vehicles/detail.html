@@ -22,7 +22,6 @@
         <div>
             <div class="page-eyebrow">Expediente Vehicular // Veloxa</div>
             <h1 class="page-title" th:text="${vehicle.modelBrand() + ' ' + vehicle.modelName()}">Toyota Hilux</h1>
-            <p class="page-subtitle">Identificación oficial, modelo vinculado e información del propietario.</p>
         </div>
         <div class="page-actions">
             <a th:href="@{/vehicles}" class="btn btn-ghost">← Flota</a>
@@ -97,7 +96,6 @@
         </section>
 
         <aside class="neo-card">
-            <div class="form-section-title" style="margin-top: 0;">Operaciones de Taller</div>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 <a th:href="@{/repairs/new}" class="btn btn-accent" style="width: 100%;">
                     + Nueva Reparación
