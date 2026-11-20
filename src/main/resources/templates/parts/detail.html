@@ -2,126 +2,118 @@
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/head :: head('Detalle del repuesto')}"></head>
+<head th:replace="~{fragments/head :: head('Detalle de Repuesto')}"></head>
 <body>
+
 <div th:replace="~{fragments/nav :: nav}"></div>
+<div th:replace="~{fragments/ui :: alerts}"></div>
 
-<main class="page-shell">
-    <div class="page-header">
-        <div class="page-header-copy">
-            <div class="breadcrumb">
-                <a th:href="@{/}">Inicio</a>
-                <span>/</span>
-                <a th:href="@{/parts}">Repuestos</a>
-                <span>/</span>
-                <span th:text="${part.name()}">Detalle</span>
-            </div>
-            <h1 th:text="${part.name()}">Detalle del repuesto</h1>
-            <p th:text="'Compatible con ' + ${part.modelBrand() + ' ' + part.modelName()}"></p>
+<main class="app-main fade-in">
+
+    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
+        <a th:href="@{/}">Panel</a>
+        <span class="breadcrumb-sep">//</span>
+        <a th:href="@{/parts}">Repuestos</a>
+        <span class="breadcrumb-sep">//</span>
+        <span th:text="'#' + ${part.id()}">#1</span>
+    </nav>
+
+    <header class="page-header">
+        <div>
+            <div class="page-eyebrow">Ficha de Inventario // Veloxa</div>
+            <h1 class="page-title" th:text="${part.name()}">Filtro de Aceite</h1>
+            <p class="page-subtitle">Existencias actuales, precio de referencia y fotografía del repuesto.</p>
         </div>
-
         <div class="page-actions">
-            <a class="btn btn-secondary" th:href="@{/parts}">&larr; Volver al listado</a>
-            <a class="btn" sec:authorize="hasRole('ADMIN')" th:href="@{/parts/{id}/edit(id=${part.id()})}">
-                Editar repuesto
-            </a>
+            <a th:href="@{/parts}" class="btn btn-ghost">← Inventario</a>
+            <div class="action-matrix" sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/parts/{id}/edit(id=${part.id()})}"
+                   class="action-btn-edit" data-tooltip="Editar registro" aria-label="Editar registro">
+                    <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </a>
+                <form th:action="@{/parts/{id}(id=${part.id()})}" method="post" data-no-guard="true"
+                      onsubmit="return confirm('¿Eliminar este repuesto del catálogo?');">
+                    <input type="hidden" name="_method" value="delete">
+                    <button type="submit" class="action-btn-delete" data-tooltip="Eliminar registro" aria-label="Eliminar registro">
+                        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
+    </header>
 
-    <p class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></p>
-    <p class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
-
-    <div class="part-detail-layout">
-        <!-- Ficha técnica del repuesto -->
-        <section class="card">
-            <div class="card-header">
-                <h2>Especificaciones</h2>
-                <span class="badge badge-danger badge-pulse" th:if="${part.stock() == 0}">Agotado</span>
-                <span class="badge badge-warning" th:if="${part.stock() > 0 and part.stock() <= 5}"
-                      th:text="${part.stock() + ' uds · Stock bajo'}"></span>
-                <span class="badge badge-success" th:if="${part.stock() > 5}"
-                      th:text="${part.stock() + ' uds disponibles'}"></span>
+    <div class="detail-layout fade-in-1">
+        <section class="neo-card">
+            <div class="form-section-title" style="margin-top: 0;">Especificaciones y Stock</div>
+            <div class="spec-grid">
+                <div class="spec-tile">
+                    <span class="spec-label">Código EAN</span>
+                    <span class="spec-value mono" style="color: var(--brand-cyan);" th:text="${part.ean()}">7701234567890</span>
+                </div>
+                <div class="spec-tile">
+                    <span class="spec-label">Precio Unitario</span>
+                    <span class="spec-value mono"
+                          th:text="${part.price() != null ? '$ ' + #numbers.formatDecimal(part.price(), 1, 'POINT', 0, 'COMMA') : '—'}">$ 45.000</span>
+                </div>
+                <div class="spec-tile">
+                    <span class="spec-label">Disponibilidad</span>
+                    <div>
+                        <span th:if="${part.stock() == null or part.stock() <= 0}" class="neo-badge badge-danger badge-pulse">
+                            <span class="neo-badge-dot"></span>Agotado (0)
+                        </span>
+                        <span th:if="${part.stock() != null and part.stock() > 0 and part.stock() <= 5}" class="neo-badge badge-warning">
+                            <span class="neo-badge-dot"></span><span th:text="${'Stock Bajo: ' + part.stock()}">3</span>
+                        </span>
+                        <span th:if="${part.stock() != null and part.stock() > 5}" class="neo-badge badge-success">
+                            <span class="neo-badge-dot"></span><span th:text="${part.stock() + ' unidades'}">20 unidades</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="spec-tile">
+                    <span class="spec-label">Modelo Compatible</span>
+                    <span class="spec-value" th:text="${part.modelBrand() + ' ' + part.modelName()}">Toyota Corolla</span>
+                </div>
             </div>
 
-            <dl class="detail-grid">
-                <div class="detail-item">
-                    <dt>ID de registro</dt>
-                    <dd class="mono" th:text="'#' + ${part.id()}"></dd>
-                </div>
-                <div class="detail-item">
-                    <dt>Precio unitario</dt>
-                    <dd class="price-tag"
-                        th:text="${'$ ' + #numbers.formatDecimal(part.price(), 1, 'POINT', 2, 'COMMA')}"></dd>
-                </div>
-                <div class="detail-item">
-                    <dt>Código de barras (EAN)</dt>
-                    <dd><span class="ean-code" th:text="${part.ean()}"></span></dd>
-                </div>
-                <div class="detail-item">
-                    <dt>Modelo compatible</dt>
-                    <dd th:text="${part.modelName() + ' - ' + part.modelBrand()}"></dd>
-                </div>
-                <div class="detail-item" style="grid-column: 1 / -1;">
-                    <dt>Descripción</dt>
-                    <dd th:text="${part.description() != null and !#strings.isEmpty(part.description())} ? ${part.description()} : 'Sin descripción registrada.'"></dd>
-                </div>
-            </dl>
+            <div class="spec-tile" style="margin-top: 1rem;">
+                <span class="spec-label">Descripción Técnica</span>
+                <p style="color: var(--text-secondary); margin-top: 0.25rem;"
+                   th:text="${!#strings.isEmpty(part.description()) ? part.description() : 'Sin descripción técnica registrada.'}"></p>
+            </div>
         </section>
 
-        <!-- Imagen de referencia (RF-20) -->
-        <section class="card">
-            <div class="card-header">
-                <h2>Imagen de referencia</h2>
-                <span class="badge badge-neutral">RF-20</span>
+        <!-- Panel Lateral: Fotografía + Carga RF-20 (Solo ADMIN) -->
+        <aside class="neo-card">
+            <div class="form-section-title" style="margin-top: 0;">Fotografía de Referencia</div>
+
+            <img th:if="${part.imageUrl() != null and !#strings.isEmpty(part.imageUrl())}"
+                 th:src="${#strings.startsWith(part.imageUrl(), '/') ? part.imageUrl() : '/uploads/parts/' + part.imageUrl()}"
+                 th:alt="${part.name()}"
+                 class="part-hero-image">
+
+            <div th:if="${part.imageUrl() == null or #strings.isEmpty(part.imageUrl())}"
+                 class="empty-state" style="padding: 2rem 1rem;">
+                <p style="color: var(--text-muted); font-size: 0.86rem;">Sin fotografía cargada.</p>
             </div>
 
-            <div class="part-image-stage">
-                <img th:if="${part.imageUrl() != null}"
-                     th:src="@{'/part-images/' + ${part.imageUrl()}}"
-                     th:alt="${part.name()}">
-
-                <div th:if="${part.imageUrl() == null}">
-                    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-bottom: 0.5rem; opacity: 0.65;">
-                        <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
-                        <circle cx="9" cy="9" r="2"></circle>
-                        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
-                    </svg>
-                    <p style="margin: 0; font-size: 0.88rem;">Este repuesto aún no tiene imagen.</p>
-                </div>
-            </div>
-
-            <!-- RF-20: adjuntar o reemplazar la imagen (RF-05: solo administrador) -->
-            <form class="file-dropzone"
-                  sec:authorize="hasRole('ADMIN')"
+            <form sec:authorize="hasRole('ADMIN')"
+                  th:action="@{/parts/{id}/image(id=${part.id()})}"
                   method="post"
                   enctype="multipart/form-data"
-                  th:action="@{/parts/{id}/image(id=${part.id()})}">
-                <label for="image" th:text="${part.imageUrl() == null} ? 'Adjuntar nueva imagen' : 'Reemplazar imagen actual'"></label>
-                <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/webp" required>
-                <img id="imagePreview" class="preview-thumb" alt="Vista previa de imagen seleccionada">
-                <span class="form-hint">Formatos permitidos: JPG, PNG o WEBP. Tamaño máximo: 2 MB.</span>
-                <button type="submit" class="btn btn-sm">Subir imagen</button>
+                  style="margin-top: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                <div class="form-group">
+                    <label for="image">Adjuntar / Reemplazar Imagen</label>
+                    <input type="file" id="image" name="image" accept="image/png, image/jpeg, image/webp" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Guardar Fotografía
+                </button>
             </form>
-        </section>
+        </aside>
     </div>
+
 </main>
 
-<script sec:authorize="hasRole('ADMIN')">
-    (function () {
-        var fileInput = document.getElementById('image');
-        var preview = document.getElementById('imagePreview');
-        if (!fileInput || !preview) return;
-        fileInput.addEventListener('change', function () {
-            var file = fileInput.files && fileInput.files[0];
-            if (!file) {
-                preview.classList.remove('is-visible');
-                preview.removeAttribute('src');
-                return;
-            }
-            preview.src = URL.createObjectURL(file);
-            preview.classList.add('is-visible');
-        });
-    })();
-</script>
+<footer th:replace="~{fragments/ui :: footer}"></footer>
 </body>
 </html>

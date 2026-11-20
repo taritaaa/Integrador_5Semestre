@@ -1,86 +1,87 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Buscar modelo por placa')}"></head>
+<head th:replace="~{fragments/head :: head('Consultar Modelo por Placa')}"></head>
 <body>
+
 <div th:replace="~{fragments/nav :: nav}"></div>
+<div th:replace="~{fragments/ui :: alerts}"></div>
 
-<main class="page-shell">
-    <div class="form-card">
-        <div class="page-header">
-            <div class="page-header-copy">
-                <div class="breadcrumb">
-                    <a th:href="@{/}">Inicio</a>
-                    <span>/</span>
-                    <a th:href="@{/vehicles}">Vehículos</a>
-                    <span>/</span>
-                    <span>Consultar placa</span>
-                </div>
-                <h1>Buscar modelo por placa</h1>
-                <p>Identifica rápidamente el tipo de matrícula, la marca y la línea de un vehículo registrado.</p>
-            </div>
+<main class="app-main fade-in">
 
-            <div class="page-actions">
-                <a class="btn btn-secondary" th:href="@{/vehicles}">&larr; Volver a vehículos</a>
+    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
+        <a th:href="@{/}">Panel</a>
+        <span class="breadcrumb-sep">//</span>
+        <a th:href="@{/vehicles}">Vehículos</a>
+        <span class="breadcrumb-sep">//</span>
+        <span>Consulta por Placa</span>
+    </nav>
+
+    <header class="page-header">
+        <div>
+            <div class="page-eyebrow">Telemetría Rápida // RF-27</div>
+            <h1 class="page-title">Consultar Modelo por Placa</h1>
+            <p class="page-subtitle">
+                Ingresa una placa registrada en Veloxa Service para identificar al instante su marca, modelo y tipo de placa.
+            </p>
+        </div>
+        <div class="page-actions">
+            <a th:href="@{/vehicles}" class="btn btn-ghost">← Volver a Vehículos</a>
+        </div>
+    </header>
+
+    <section class="lookup-console fade-in-1">
+        <form th:action="@{/vehicles/model-by-plate}" method="get" class="lookup-form-row">
+            <div class="form-group">
+                <label for="plate">Número de Placa Colombiana</label>
+                <input type="text"
+                       id="plate"
+                       name="plate"
+                       th:value="${plate}"
+                       class="plate-input-hero"
+                       placeholder="EJ: ABC-123"
+                       maxlength="10"
+                       required
+                       autofocus>
             </div>
+            <button type="submit" class="btn btn-accent" style="min-height: 52px; padding-inline: 1.75rem;">
+                Consultar →
+            </button>
+        </form>
+    </section>
+
+    <!-- Resultado Encontrado (PlateModelDTO) -->
+    <section th:if="${result != null}" class="form-shell fade-in-2" style="max-width: 820px;">
+        <div class="plate-showcase">
+            <div>
+                <div class="spec-label">Vehículo Identificado</div>
+                <h2 style="font-size: 1.5rem; margin-top: 0.2rem;"
+                    th:text="${result.brand() + ' ' + result.modelName()}">Toyota Corolla</h2>
+            </div>
+            <span class="plate-badge plate-yellow"
+                  style="font-size: 1.3rem; padding: 0.4rem 1.1rem;"
+                  th:text="${result.licensePlate()}">ABC-123</span>
         </div>
 
-        <section class="card">
-            <form method="get" th:action="@{/vehicles/model-by-plate}">
-                <label for="plate">Número de placa</label>
-                <div class="lookup-search" style="margin-top: 0.4rem;">
-                    <input type="text"
-                           id="plate"
-                           name="plate"
-                           maxlength="7"
-                           required
-                           autofocus
-                           th:value="${plate}"
-                           placeholder="Ej: ABC-123, ABC-12A, R-12345"
-                           oninput="this.value = this.value.toUpperCase()">
-                    <button type="submit" class="btn btn-accent">Buscar placa</button>
-                </div>
-
-                <div class="format-chips" aria-label="Ejemplos de formatos válidos">
-                    <span class="format-chip">Carro / Camión: <strong>ABC-123</strong></span>
-                    <span class="format-chip">Moto: <strong>ABC-12 / ABC-12A</strong></span>
-                    <span class="format-chip">Remolque: <strong>R-12345</strong></span>
-                    <span class="format-chip">Semirremolque: <strong>S-12345</strong></span>
-                    <span class="format-chip">Diplomático: <strong>CC-1234 / CD-1234</strong></span>
-                </div>
-                <span class="form-hint" style="display:block; margin-top: 0.55rem;">
-                    Puede escribir la matrícula con o sin guion.
-                </span>
-            </form>
-        </section>
-
-        <p class="alert alert-error" style="margin-top: 1.25rem;" th:if="${errorMessage}" th:text="${errorMessage}"></p>
-
-        <section class="card result-highlight" th:if="${result}">
-            <div class="card-header">
-                <h2>Resultado encontrado</h2>
-                <span class="colombia-plate colombia-plate-lg" th:text="${result.licensePlate()}"></span>
+        <div class="spec-grid">
+            <div class="spec-tile">
+                <span class="spec-label">Marca</span>
+                <span class="spec-value" th:text="${result.brand()}">Toyota</span>
             </div>
+            <div class="spec-tile">
+                <span class="spec-label">Modelo / Línea</span>
+                <span class="spec-value" th:text="${result.modelName()}">Corolla</span>
+            </div>
+            <div class="spec-tile" style="grid-column: 1 / -1;">
+                <span class="spec-label">Clasificación / Tipo de Placa</span>
+                <div>
+                    <span class="neo-badge badge-info" th:text="${result.plateType()}">Automóvil</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            <dl class="detail-grid">
-                <div class="detail-item">
-                    <dt>Placa</dt>
-                    <dd class="mono" th:text="${result.licensePlate()}"></dd>
-                </div>
-                <div class="detail-item">
-                    <dt>Tipo de placa</dt>
-                    <dd><span class="badge badge-info" th:text="${result.plateType()}"></span></dd>
-                </div>
-                <div class="detail-item">
-                    <dt>Marca</dt>
-                    <dd th:text="${result.brand()}"></dd>
-                </div>
-                <div class="detail-item">
-                    <dt>Modelo</dt>
-                    <dd th:text="${result.modelName()}"></dd>
-                </div>
-            </dl>
-        </section>
-    </div>
 </main>
+
+<footer th:replace="~{fragments/ui :: footer}"></footer>
 </body>
 </html>

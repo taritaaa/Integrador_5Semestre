@@ -1,145 +1,101 @@
-
 <!DOCTYPE html>
-<html lang="es"
-      xmlns:th="http://www.thymeleaf.org">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Mapa de reparaciones - Taller</title>
-
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
-</head>
-
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Mapa Histórico de Reparaciones')}"></head>
 <body>
 
 <div th:replace="~{fragments/nav :: nav}"></div>
+<div th:replace="~{fragments/ui :: alerts}"></div>
 
-<h1>Ubicaciones de reparaciones</h1>
+<main class="app-main fade-in">
 
-<p>
-    Consulte los lugares donde se realizaron las
-    reparaciones de un vehículo.
-</p>
+    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
+        <a th:href="@{/}">Panel</a>
+        <span class="breadcrumb-sep">//</span>
+        <a th:href="@{/repairs}">Reparaciones</a>
+        <span class="breadcrumb-sep">//</span>
+        <span>Mapa Interactivo</span>
+    </nav>
 
-<!-- Buscar por placa -->
-<form method="get"
-      th:action="@{/repairs/map}">
+    <header class="page-header">
+        <div>
+            <div class="page-eyebrow">Telemetría Geográfica // RF-28</div>
+            <h1 class="page-title">Mapa de Reparaciones y Tiendas</h1>
+            <p class="page-subtitle">
+                Visualiza los puntos georreferenciados de cada intervención registrada y filtra por placa.
+            </p>
+        </div>
+        <div class="page-actions">
+            <a th:href="@{/repairs}" class="btn btn-ghost">← Listado de Órdenes</a>
+            <a th:href="@{/repairs/new}" class="btn btn-accent">+ Nueva Reparación</a>
+        </div>
+    </header>
 
-    <label for="plate">Placa del vehículo</label>
+    <!-- Filtro por placa -->
+    <form th:action="@{/repairs/map}" method="get" class="filter-bar fade-in-1">
+        <div class="form-group" style="flex: 1 1 260px;">
+            <label for="plate">Filtrar Marcadores por Placa</label>
+            <input type="search" id="plate" name="plate" th:value="${plate}"
+                   class="mono" style="text-transform: uppercase;" placeholder="Ej: ABC-123">
+        </div>
+        <div style="display: flex; gap: 0.6rem; align-self: end;">
+            <button type="submit" class="btn btn-primary">Filtrar Mapa</button>
+            <a th:href="@{/repairs/map}" class="btn btn-ghost">Ver Todos</a>
+        </div>
+    </form>
 
-    <input type="text"
-           id="plate"
-           name="plate"
-           placeholder="Ejemplo: SIW-234"
-           th:value="${plate}">
+    <!-- Contenedor Principal del Mapa Leaflet -->
+    <section class="neo-map-frame fade-in-1">
+        <div id="repairHistoryMap" class="neo-map-canvas tall"></div>
+    </section>
 
-    <button type="submit">
-        Buscar ubicaciones
-    </button>
-
-    <a th:href="@{/repairs/map}">
-        Ver todas
-    </a>
-
-</form>
-
-<!-- Resultado -->
-<h2>Mapa de ubicaciones</h2>
-
-<p th:if="${#lists.isEmpty(locations)}">
-    No se encontraron reparaciones con ubicación
-    registrada para esta búsqueda.
-</p>
-
-<p th:unless="${#lists.isEmpty(locations)}">
-    Ubicaciones registradas:
-    <strong th:text="${#lists.size(locations)}"></strong>
-</p>
-
-<!-- Mapa Leaflet -->
-<div id="repairHistoryMap"
-     style="height: 500px; width: 100%;">
-</div>
-
-<!-- Información para JavaScript -->
-<div id="locationsData" hidden>
-
-    <div class="location-point"
-         th:each="loc : ${locations}"
-
-         th:attr="data-id=${loc.repairId()},
-                  data-plate=${loc.licensePlate()},
-                  data-name=${loc.workshopName()},
-                  data-lat=${loc.latitude()},
-                  data-lng=${loc.longitude()},
-                  data-type=${loc.type()},
-                  data-status=${loc.status()}">
+    <!-- Estado vacío si no hay puntos -->
+    <div th:if="${#lists.isEmpty(locations)}" style="margin-top: 1.5rem;">
+        <div th:replace="~{fragments/ui :: emptyState(
+            'Sin ubicaciones georreferenciadas',
+            'Asigna coordenadas GPS desde el detalle de cualquier reparación para visualizarlas aquí.',
+            @{/repairs},
+            'Ir a Reparaciones'
+        )}"></div>
     </div>
 
-</div>
+    <!-- Tarjetas de Puntos (también proveen los data-* que lee repair-history-map.js) -->
+    <section th:if="${!#lists.isEmpty(locations)}" class="location-points-grid fade-in-2">
+        <article class="location-point-card location-point"
+                 th:each="loc : ${locations}"
+                 th:attr="data-id=${loc.repairId()},
+                          data-plate=${loc.licensePlate()},
+                          data-name=${loc.workshopName()},
+                          data-type=${loc.type()},
+                          data-status=${loc.status() != null ? loc.status().name() : ''},
+                          data-lat=${loc.latitude()},
+                          data-lng=${loc.longitude()}">
 
-<!-- Lista de ubicaciones encontradas -->
-<h2>Historial de ubicaciones</h2>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                <span class="plate-badge plate-yellow" th:text="${loc.licensePlate()}">ABC-123</span>
+                <span class="mono" style="font-size: 0.78rem; color: var(--brand-cyan); font-weight: 700;"
+                      th:text="'ORDEN #' + ${loc.repairId()}">#1</span>
+            </div>
 
-<p th:if="${#lists.isEmpty(locations)}">
-    No hay ubicaciones disponibles.
-</p>
+            <div>
+                <h3 style="font-size: 1.02rem; margin-bottom: 0.2rem;"
+                    th:text="${loc.workshopName() != null and !#strings.isEmpty(loc.workshopName()) ? loc.workshopName() : 'Punto sin nombre'}">Taller</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);" th:text="${loc.type()}">Mantenimiento</p>
+            </div>
 
-<table th:unless="${#lists.isEmpty(locations)}">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: auto; padding-top: 0.65rem; border-top: 1px solid var(--border-subtle);">
+                <span class="mono" style="font-size: 0.72rem; color: var(--text-muted);"
+                      th:text="${loc.latitude() + ', ' + loc.longitude()}">5.53, -73.36</span>
+                <a th:href="@{/repairs/{id}(id=${loc.repairId()})}"
+                   class="action-btn-view" data-tooltip="Ver reparación" aria-label="Ver reparación">
+                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </a>
+            </div>
+        </article>
+    </section>
 
-    <thead>
-    <tr>
-        <th>Reparación</th>
-        <th>Placa</th>
-        <th>Taller</th>
-        <th>Latitud</th>
-        <th>Longitud</th>
-        <th>Acciones</th>
-    </tr>
-    </thead>
+</main>
 
-    <tbody>
-
-    <tr th:each="loc : ${locations}">
-
-        <td th:text="${loc.repairId()}"></td>
-
-        <td th:text="${loc.licensePlate()}"></td>
-
-        <td th:text="${loc.workshopName()}"></td>
-
-        <td th:text="${loc.latitude()}"></td>
-
-        <td th:text="${loc.longitude()}"></td>
-
-        <td>
-            <a th:href="@{/repairs/{id}(id=${loc.repairId()})}">
-                Ver reparación
-            </a>
-        </td>
-
-    </tr>
-
-    </tbody>
-
-</table>
-
-<p>
-    <a th:href="@{/repairs}">
-        Volver al historial
-    </a>
-</p>
-
-<!-- Leaflet -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- JavaScript del proyecto -->
-<script th:src="@{/js/repair-history-map.js}"></script>
-
+<footer th:replace="~{fragments/ui :: footer}"></footer>
+<script th:src="@{/js/repair-history-map.js}" defer></script>
 </body>
 </html>

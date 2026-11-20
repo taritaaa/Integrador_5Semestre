@@ -1,68 +1,88 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Ubicación de la taller - Taller</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-</head>
+<head th:replace="~{fragments/head :: head('Ubicación de Reparación #' + ${repair.id()})}"></head>
 <body>
-<h1>Ubicación de la taller</h1>
-<p>Reparación <strong th:text="${'#' + repair.id() + ' - ' + repair.licensePlate()}"></strong>:
-    marque en el mapa dónde se realizó la reparación.</p>
 
-<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+<div th:replace="~{fragments/nav :: nav}"></div>
+<div th:replace="~{fragments/ui :: alerts}"></div>
 
-<form method="post" th:action="@{/repairs/{id}/location(id=${repair.id()})}">
-    <input type="hidden" name="_method" value="put">
+<main class="app-main fade-in">
 
-    <label for="workshopName">Nombre de la taller</label>
-    <input type="text" id="workshopName" name="workshopName" maxlength="100" required
-           th:value="${repair.workshopName()}">
+    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
+        <a th:href="@{/}">Panel</a>
+        <span class="breadcrumb-sep">//</span>
+        <a th:href="@{/repairs}">Reparaciones</a>
+        <span class="breadcrumb-sep">//</span>
+        <a th:href="@{/repairs/{id}(id=${repair.id()})}" th:text="'Orden #' + ${repair.id()}">Orden</a>
+        <span class="breadcrumb-sep">//</span>
+        <span>Ubicación GPS</span>
+    </nav>
 
-    <input type="hidden" id="latitude" name="latitude" th:value="${repair.workshopLatitude()}">
-    <input type="hidden" id="longitude" name="longitude" th:value="${repair.workshopLongitude()}">
+    <header class="page-header">
+        <div>
+            <div class="page-eyebrow">Geolocalización // RF-28</div>
+            <h1 class="page-title" th:text="${'Ubicación — Orden #' + repair.id()}">Ubicación GPS</h1>
+            <p class="page-subtitle">
+                Vehículo <strong class="mono" th:text="${repair.licensePlate()}">ABC-123</strong>.
+                Haz clic sobre el mapa o usa el GPS del dispositivo para fijar el taller o tienda de repuestos.
+            </p>
+        </div>
+        <div class="page-actions">
+            <a th:href="@{/repairs/{id}(id=${repair.id()})}" class="btn btn-ghost">← Volver a la Orden</a>
+        </div>
+    </header>
 
-    <p>Haga clic en el mapa para marcar el punto. Punto elegido: <strong id="selected">ninguno</strong></p>
-    <div id="map" style="height: 400px;"></div>
+    <section class="form-shell fade-in-1">
+        <form th:action="@{/repairs/{id}/location(id=${repair.id()})}" method="post">
+            <input type="hidden" name="_method" value="put">
 
-    <button type="submit">Guardar ubicación</button>
-    <a th:href="@{/repairs/{id}(id=${repair.id()})}">Cancelar</a>
-</form>
+            <div class="form-grid" style="margin-bottom: 1.25rem;">
+                <div class="form-group full-width">
+                    <label for="workshopName">Nombre del Taller o Tienda de Repuestos *</label>
+                    <input type="text" id="workshopName" name="workshopName"
+                           th:value="${repair.workshopName()}"
+                           placeholder="Ej: Veloxa Service Sede Principal / Repuestos El Motor"
+                           required autofocus>
+                </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script th:inline="javascript">
-    const savedLat = /*[[${repair.workshopLatitude()}]]*/ null;
-    const savedLng = /*[[${repair.workshopLongitude()}]]*/ null;
-    const hasPoint = savedLat !== null && savedLng !== null;
+                <!-- IDs para repair-location.js; names para RepairController.saveLocation -->
+                <div class="form-group">
+                    <label for="workshopLatitude">Latitud *</label>
+                    <input type="number" id="workshopLatitude" name="latitude"
+                           th:value="${repair.workshopLatitude()}"
+                           step="any" class="mono" placeholder="5.535280" required>
+                </div>
 
-    // Si ya hay un punto se centra ahí; si no, se muestra Colombia completa
-    const map = L.map('map').setView(hasPoint ? [savedLat, savedLng] : [4.5709, -74.2973], hasPoint ? 15 : 6);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
+                <div class="form-group">
+                    <label for="workshopLongitude">Longitud *</label>
+                    <input type="number" id="workshopLongitude" name="longitude"
+                           th:value="${repair.workshopLongitude()}"
+                           step="any" class="mono" placeholder="-73.367780" required>
+                </div>
+            </div>
 
-    let marker = null;
+            <div class="map-toolbar">
+                <span class="form-hint">Arrastra el pin en el mapa para ajustar la precisión al metro.</span>
+                <button type="button" id="currentLocation" class="btn btn-primary" style="min-height: 40px;">
+                    Capturar Ubicación Actual (GPS)
+                </button>
+            </div>
 
-    function setPoint(lat, lng) {
-        if (marker === null) {
-            marker = L.marker([lat, lng]).addTo(map);
-        } else {
-            marker.setLatLng([lat, lng]);
-        }
-        document.getElementById('latitude').value = lat;
-        document.getElementById('longitude').value = lng;
-        document.getElementById('selected').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
-    }
+            <div class="neo-map-frame">
+                <div id="repairLocationMap" class="neo-map-canvas tall"></div>
+            </div>
+            <p id="locationMessage" class="location-status-msg"></p>
 
-    if (hasPoint) {
-        setPoint(savedLat, savedLng);
-    }
+            <div class="form-actions">
+                <a th:href="@{/repairs/{id}(id=${repair.id()})}" class="btn btn-ghost">Cancelar</a>
+                <button type="submit" class="btn btn-accent">Guardar Ubicación →</button>
+            </div>
+        </form>
+    </section>
 
-    map.on('click', function (e) {
-        setPoint(e.latlng.lat, e.latlng.lng);
-    });
-</script>
+</main>
+
+<footer th:replace="~{fragments/ui :: footer}"></footer>
+<script th:src="@{/js/repair-location.js}" defer></script>
 </body>
 </html>

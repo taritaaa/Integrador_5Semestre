@@ -1,156 +1,121 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head(${part.id() == null} ? 'Registrar repuesto' : 'Editar repuesto')}"></head>
+<head th:replace="~{fragments/head :: head(${part.id() != null ? 'Editar Repuesto' : 'Nuevo Repuesto'})}"></head>
 <body>
+
 <div th:replace="~{fragments/nav :: nav}"></div>
+<div th:replace="~{fragments/ui :: alerts}"></div>
 
-<main class="page-shell">
-    <div class="form-card">
-        <div class="page-header">
-            <div class="page-header-copy">
-                <div class="breadcrumb">
-                    <a th:href="@{/}">Inicio</a>
-                    <span>/</span>
-                    <a th:href="@{/parts}">Repuestos</a>
-                    <span>/</span>
-                    <span th:text="${part.id() == null} ? 'Nuevo' : 'Editar'"></span>
+<main class="app-main fade-in">
+
+    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
+        <a th:href="@{/}">Panel</a>
+        <span class="breadcrumb-sep">//</span>
+        <a th:href="@{/parts}">Repuestos</a>
+        <span class="breadcrumb-sep">//</span>
+        <span th:text="${part.id() != null ? 'Editar #' + part.id() : 'Nuevo Repuesto'}">Formulario</span>
+    </nav>
+
+    <header class="page-header">
+        <div>
+            <div class="page-eyebrow">MOD // 03 • Catálogo Técnico</div>
+            <h1 class="page-title" th:text="${part.id() != null ? 'Editar Repuesto' : 'Registrar Nuevo Repuesto'}">
+                Registrar Nuevo Repuesto
+            </h1>
+            <p class="page-subtitle">
+                Configura código EAN, precio unitario, stock disponible y compatibilidad con el catálogo de modelos.
+            </p>
+        </div>
+        <div class="page-actions">
+            <a th:href="@{/parts}" class="btn btn-ghost">← Volver al Inventario</a>
+        </div>
+    </header>
+
+    <section class="form-shell fade-in-1">
+        <!-- Crear usa multipart/form-data (RF-16); Editar usa _method=put (RF-18) -->
+        <form th:action="${part.id() == null} ? @{/parts} : @{/parts/{id}(id=${part.id()})}"
+              th:attr="enctype=${part.id() == null ? 'multipart/form-data' : 'application/x-www-form-urlencoded'}"
+              method="post">
+            <input th:if="${part.id() != null}" type="hidden" name="_method" value="put">
+
+            <div class="form-section-title">1. Identificación y Compatibilidad</div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Nombre del Repuesto *</label>
+                    <input type="text" id="name" name="name"
+                           th:value="${part.name()}"
+                           placeholder="Ej: Pastillas de Freno Delanteras Cerámicas"
+                           required autofocus>
                 </div>
-                <h1 th:text="${part.id() == null} ? 'Registrar repuesto' : 'Editar repuesto'">Registrar repuesto</h1>
-                <p>Configura el nombre, precio, existencias, código EAN y compatibilidad del repuesto.</p>
+
+                <div class="form-group">
+                    <label for="ean">Código EAN *</label>
+                    <input type="text" id="ean" name="ean"
+                           th:value="${part.ean()}"
+                           class="mono"
+                           placeholder="Ej: 7701234567890"
+                           required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="modelId">Modelo de Vehículo Compatible *</label>
+                    <select id="modelId" name="modelId" required>
+                        <option value="">Selecciona un modelo...</option>
+                        <option th:each="m : ${models}"
+                                th:value="${m.id()}"
+                                th:text="${m.brand() + ' ' + m.name() + ' (' + m.vehicleTypeLabel() + ')'}"
+                                th:selected="${part.modelId() == m.id()}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="description">Descripción Técnica</label>
+                    <textarea id="description" name="description"
+                              th:text="${part.description()}"
+                              placeholder="Especificaciones del fabricante, referencias cruzadas o recomendaciones de instalación..."></textarea>
+                </div>
             </div>
-        </div>
 
-        <p class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+            <div class="form-section-title">2. Precio, Existencias e Imagen</div>
 
-        <div class="alert alert-warning" th:if="${models.isEmpty()}">
-            Primero debe registrar un modelo en <a th:href="@{/models/new}">Modelos</a> antes de crear un repuesto.
-        </div>
-
-        <section class="card">
-            <!-- Al registrar el formulario es multipart (puede traer imagen); al editar no -->
-            <form method="post"
-                  th:action="${part.id() == null} ? @{/parts} : @{/parts/{id}(id=${part.id()})}"
-                  th:attr="enctype=${part.id() == null} ? 'multipart/form-data' : 'application/x-www-form-urlencoded'">
-                <input type="hidden" name="_method" value="put" th:if="${part.id() != null}">
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="name">Nombre del repuesto</label>
-                        <input type="text"
-                               id="name"
-                               name="name"
-                               maxlength="100"
-                               placeholder="Ej: Filtro de aceite, Pastillas de freno"
-                               required
-                               autofocus
-                               th:value="${part.name()}">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="modelId">Modelo compatible</label>
-                        <select id="modelId" name="modelId" required>
-                            <option value="">Seleccione un modelo</option>
-                            <option th:each="m : ${models}"
-                                    th:value="${m.id()}"
-                                    th:text="${m.name() + ' - ' + m.brand()}"
-                                    th:selected="${part.modelId() == m.id()}"></option>
-                        </select>
-                    </div>
-
-                    <div class="form-group full">
-                        <label for="description">Descripción (opcional)</label>
-                        <input type="text"
-                               id="description"
-                               name="description"
-                               maxlength="255"
-                               placeholder="Especificaciones técnicas, referencia del fabricante o notas"
-                               th:value="${part.description()}">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="price">Precio unitario (COP)</label>
-                        <input type="number"
-                               id="price"
-                               name="price"
-                               class="mono"
-                               min="0"
-                               step="0.01"
-                               placeholder="0.00"
-                               required
-                               th:value="${part.price()}">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="stock">Stock disponible</label>
-                        <input type="number"
-                               id="stock"
-                               name="stock"
-                               class="mono"
-                               min="0"
-                               step="1"
-                               placeholder="0"
-                               required
-                               th:value="${part.stock()}">
-                    </div>
-
-                    <!-- Al registrar, el EAN se escribe. Al editar, solo se muestra (no se puede cambiar). -->
-                    <div class="form-group full" th:if="${part.id() == null}">
-                        <label for="ean">Código de barras (EAN, 13 dígitos)</label>
-                        <input type="text"
-                               id="ean"
-                               name="ean"
-                               class="mono"
-                               maxlength="13"
-                               pattern="\d{13}"
-                               inputmode="numeric"
-                               placeholder="7701234567890"
-                               required
-                               th:value="${part.ean()}">
-                        <span class="form-hint">Debe contener exactamente 13 dígitos numéricos sin espacios.</span>
-                    </div>
-
-                    <div class="form-group full" th:if="${part.id() != null}">
-                        <label>Código de barras EAN (no editable)</label>
-                        <input type="text" class="mono" th:value="${part.ean()}" readonly>
-                        <input type="hidden" name="ean" th:value="${part.ean()}">
-                    </div>
-
-                    <!-- La imagen solo se adjunta al registrar; para cambiarla después se usa la pantalla de detalle -->
-                    <div class="form-group full" th:if="${part.id() == null}">
-                        <label for="image">Imagen de referencia (opcional)</label>
-                        <div class="file-dropzone" style="margin-top: 0;">
-                            <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/webp">
-                            <img id="imagePreview" class="preview-thumb" alt="Vista previa del repuesto">
-                            <span class="form-hint">Formatos JPG, PNG o WEBP, máximo 2 MB. También podrás cambiarla después en el detalle.</span>
-                        </div>
-                    </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="price">Precio Unitario (COP) *</label>
+                    <input type="number" id="price" name="price"
+                           th:value="${part.price()}"
+                           step="0.01" min="0"
+                           class="mono" placeholder="125000" required>
                 </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn">Guardar repuesto</button>
-                    <a class="btn btn-secondary" th:href="@{/parts}">Cancelar</a>
+                <div class="form-group">
+                    <label for="stock">Stock Inicial / Actual *</label>
+                    <input type="number" id="stock" name="stock"
+                           th:value="${part.stock()}"
+                           min="0" step="1"
+                           class="mono" placeholder="10" required>
                 </div>
-            </form>
-        </section>
-    </div>
+
+                <!-- Campo de imagen al registrar (en edición se actualiza desde el detalle) -->
+                <div class="form-group full-width" th:if="${part.id() == null}">
+                    <label for="image">Fotografía de Referencia (Opcional)</label>
+                    <input type="file" id="image" name="image" accept="image/png, image/jpeg, image/webp">
+                    <span class="form-hint">Formatos permitidos: JPG, PNG o WEBP. También podrás cambiarla luego en el detalle del repuesto.</span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/parts}" class="btn btn-ghost">Cancelar</a>
+                <button type="submit" class="btn btn-accent">
+                    <span th:text="${part.id() != null ? 'Guardar Cambios' : 'Registrar Repuesto'}">Guardar</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </form>
+    </section>
+
 </main>
 
-<script th:if="${part.id() == null}">
-    (function () {
-        var fileInput = document.getElementById('image');
-        var preview = document.getElementById('imagePreview');
-        if (!fileInput || !preview) return;
-        fileInput.addEventListener('change', function () {
-            var file = fileInput.files && fileInput.files[0];
-            if (!file) {
-                preview.classList.remove('is-visible');
-                preview.removeAttribute('src');
-                return;
-            }
-            preview.src = URL.createObjectURL(file);
-            preview.classList.add('is-visible');
-        });
-    })();
-</script>
+<footer th:replace="~{fragments/ui :: footer}"></footer>
 </body>
 </html>

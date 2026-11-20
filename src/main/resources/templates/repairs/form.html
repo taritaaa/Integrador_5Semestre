@@ -1,110 +1,205 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Reparación - Taller</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-</head>
+<head th:replace="~{fragments/head :: head(${repair.id() != null ? 'Editar Reparación #' + repair.id() : 'Nueva Reparación'})}"></head>
 <body>
+
 <div th:replace="~{fragments/nav :: nav}"></div>
-<h1 th:text="${repair.id() == null} ? 'Registrar reparación' : 'Editar reparación'"></h1>
-<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
-<p th:if="${repair.id() == null and vehicles.isEmpty()}">Primero registre un vehículo en <a th:href="@{/vehicles/new}">Vehículos</a>.</p>
-<p th:if="${repair.id() == null and mechanics.isEmpty()}">No hay mecánicos activos.</p>
-<form method="post" th:action="${repair.id() == null} ? @{/repairs} : @{/repairs/{id}(id=${repair.id()})}">
-    <input type="hidden" name="_method" value="put" th:if="${repair.id() != null}">
-    <div th:if="${repair.id() == null}">
-        <label for="date">Fecha</label>
-        <input type="date" id="date" name="date" required th:value="${repair.date()}">
-        <label for="vehicleId">Vehículo</label>
-        <select id="vehicleId" name="vehicleId" required>
-            <option value="">Seleccione</option>
-            <option th:each="v : ${vehicles}" th:value="${v.id()}"
-                    th:attr="data-model=${v.modelId()}"
-                    th:text="${v.licensePlate() + ' - ' + v.modelName() + ' ' + v.modelBrand()}"
-                    th:selected="${repair.vehicleId() == v.id()}"></option>
-        </select>
-        <label for="mechanicId">Mecánico</label>
-        <select id="mechanicId" name="mechanicId" required>
-            <option value="">Seleccione</option>
-            <option th:each="m : ${mechanics}" th:value="${m.id()}" th:text="${m.name()}"
-                    th:selected="${repair.mechanicId() == m.id()}"></option>
-        </select>
-    </div>
-    <div th:if="${repair.id() != null}">
-        <p><strong>Fecha:</strong> <span th:text="${repair.date()}"></span></p>
-        <p><strong>Vehículo:</strong> <span th:text="${repair.licensePlate()}"></span></p>
-        <p><strong>Mecánico:</strong> <span th:text="${repair.mechanicName()}"></span></p>
-    </div>
-    <label for="type">Tipo de reparación</label>
-    <input type="text" id="type" name="type" maxlength="100" required th:value="${repair.type()}">
-    <label for="status">Estado</label>
-    <select id="status" name="status" required>
-        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
-                th:selected="${repair.status() == s}"></option>
-    </select>
-    <label for="laborCost">Costo de mano de obra</label>
-    <input type="number" id="laborCost" name="laborCost" min="0" max="99999999.99" step="0.01" required
-           th:value="${repair.laborCost()}">
+<div th:replace="~{fragments/ui :: alerts}"></div>
 
-    <h2>Ubicación donde se realiza la reparación</h2>
-    <p>Puede escribir las coordenadas, hacer clic en el mapa o utilizar su ubicación actual.</p>
+<main class="app-main fade-in">
 
-    <label for="workshopName">Nombre del taller</label>
-    <input type="text" id="workshopName" name="workshopName" maxlength="100" required
-           th:value="${repair.workshopName()}" placeholder="Ej: Taller Central">
+    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
+        <a th:href="@{/}">Panel</a>
+        <span class="breadcrumb-sep">//</span>
+        <a th:href="@{/repairs}">Reparaciones</a>
+        <span class="breadcrumb-sep">//</span>
+        <span th:text="${repair.id() != null ? 'Editar #' + repair.id() : 'Nueva Orden'}">Formulario</span>
+    </nav>
 
-    <label for="workshopLatitude">Latitud</label>
-    <input type="number" id="workshopLatitude" name="workshopLatitude" min="-90" max="90"
-           step="any" required th:value="${repair.workshopLatitude()}" placeholder="Ej: 5.5353">
-
-    <label for="workshopLongitude">Longitud</label>
-    <input type="number" id="workshopLongitude" name="workshopLongitude" min="-180" max="180"
-           step="any" required th:value="${repair.workshopLongitude()}" placeholder="Ej: -73.3678">
-
-    <button id="currentLocation" type="button">Usar ubicación actual</button>
-    <p id="locationMessage" aria-live="polite"></p>
-    <div id="repairLocationMap" style="height: 350px; width: 100%;"></div>
-    <p><small>Un solo punto por reparación. La ubicación actual requiere permiso del navegador y normalmente HTTPS o localhost.</small></p>
-
-    <h2>Repuestos utilizados (opcional)</h2>
-    <p>Seleccione los repuestos y las cantidades. No puede repetir el mismo repuesto.</p>
-    <div id="items">
-        <div class="repair-item" th:each="item : ${repair.items()}">
-            <label>Repuesto
-                <select name="partIds" required>
-                    <option value="">Seleccione</option>
-                    <option th:each="p : ${parts}" th:value="${p.id()}"
-                            th:attr="data-model=${p.modelId()}"
-                            th:text="${p.name() + ' (' + p.modelName() + ') - Stock: ' + p.stock()}"
-                            th:selected="${item.partId() == p.id()}"></option>
-                </select>
-            </label>
-            <label>Cantidad <input name="quantities" type="number" min="1" step="1" required
-                                   th:value="${item.quantity()}"></label>
-            <button type="button" class="remove-item">Quitar</button>
+    <header class="page-header">
+        <div>
+            <div class="page-eyebrow">MOD // 01 • Gestión Transaccional</div>
+            <h1 class="page-title" th:text="${repair.id() != null ? 'Editar Reparación #' + repair.id() : 'Registrar Nueva Reparación'}">
+                Registrar Nueva Reparación
+            </h1>
+            <p class="page-subtitle">
+                Los repuestos se filtran automáticamente según el modelo del vehículo seleccionado y su stock se descuenta de forma transaccional.
+            </p>
         </div>
-    </div>
-    <button type="button" id="addItem">Agregar repuesto</button>
-    <template id="itemTemplate">
-        <div class="repair-item">
-            <label>Repuesto
-                <select name="partIds" required>
-                    <option value="">Seleccione</option>
-                    <option th:each="p : ${parts}" th:value="${p.id()}" th:attr="data-model=${p.modelId()}"
-                            th:text="${p.name() + ' (' + p.modelName() + ') - Stock: ' + p.stock()}"></option>
-                </select>
-            </label>
-            <label>Cantidad <input type="number" name="quantities" min="1" step="1" value="1" required></label>
-            <button type="button" class="remove-item">Quitar</button>
+        <div class="page-actions">
+            <a th:href="@{/repairs}" class="btn btn-ghost">← Volver al Historial</a>
         </div>
-    </template>
-    <p><button type="submit" th:disabled="${repair.id() == null and (vehicles.isEmpty() or mechanics.isEmpty())}">Guardar</button>
-       <a th:href="@{/repairs}">Cancelar</a></p>
-</form>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script th:src="@{/js/repairs.js}"></script>
-<script th:src="@{/js/repair-location.js}"></script>
+    </header>
+
+    <section class="form-shell fade-in-1">
+        <form th:action="${repair.id() == null} ? @{/repairs} : @{/repairs/{id}(id=${repair.id()})}"
+              method="post">
+            <input th:if="${repair.id() != null}" type="hidden" name="_method" value="put">
+
+            <div class="form-section-title">1. Datos Generales de la Orden</div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="date">Fecha de Orden *</label>
+                    <input type="date" id="date" name="date"
+                           th:value="${repair.date()}"
+                           th:readonly="${repair.id() != null}"
+                           class="mono" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Estado *</label>
+                    <select id="status" name="status" required>
+                        <option th:each="s : ${statuses}"
+                                th:value="${s.name()}"
+                                th:text="${s.name() == 'IN_PROGRESS' ? 'En Proceso' : (s.name() == 'COMPLETED' ? 'Completada' : (s.name() == 'CANCELLED' ? 'Cancelada' : s.name()))}"
+                                th:selected="${repair.status() == s}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="vehicleId">Vehículo *</label>
+                    <!-- data-model es requerido por repairs.js para filtrar repuestos compatibles -->
+                    <select id="vehicleId" name="vehicleId" th:disabled="${repair.id() != null}" required>
+                        <option value="">Selecciona un vehículo...</option>
+                        <option th:each="v : ${vehicles}"
+                                th:value="${v.id()}"
+                                th:text="${v.licensePlate() + ' — ' + v.modelBrand() + ' ' + v.modelName() + ' (' + v.ownerName() + ')'}"
+                                th:selected="${repair.vehicleId() == v.id()}"
+                                th:attr="data-model=${v.modelId()}"></option>
+                    </select>
+                    <input th:if="${repair.id() != null}" type="hidden" name="vehicleId" th:value="${repair.vehicleId()}">
+                </div>
+
+                <div class="form-group">
+                    <label for="mechanicId">Mecánico Responsable *</label>
+                    <select id="mechanicId" name="mechanicId" th:disabled="${repair.id() != null}" required>
+                        <option value="">Selecciona un mecánico...</option>
+                        <option th:each="m : ${mechanics}"
+                                th:value="${m.id()}"
+                                th:text="${m.name()}"
+                                th:selected="${repair.mechanicId() == m.id()}"></option>
+                    </select>
+                    <input th:if="${repair.id() != null}" type="hidden" name="mechanicId" th:value="${repair.mechanicId()}">
+                </div>
+
+                <div class="form-group">
+                    <label for="type">Tipo / Descripción del Trabajo *</label>
+                    <input type="text" id="type" name="type"
+                           th:value="${repair.type()}"
+                           placeholder="Ej: Cambio de kit de embrague y sincronización"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="laborCost">Costo Mano de Obra (COP) *</label>
+                    <input type="number" id="laborCost" name="laborCost"
+                           th:value="${repair.laborCost()}"
+                           step="0.01" min="0"
+                           class="mono" placeholder="180000" required>
+                </div>
+            </div>
+
+            <!-- Constructor Dinámico de Repuestos (repairs.js) -->
+            <div class="form-section-title">2. Repuestos Utilizados (Compatibles con el Modelo)</div>
+
+            <div id="items" class="repair-items-stack">
+                <!-- Filas precargadas si se está editando una orden con repuestos -->
+                <div class="repair-item" th:each="item : ${repair.items()}">
+                    <div class="form-group">
+                        <label>Repuesto</label>
+                        <select name="partIds" required>
+                            <option value="">Selecciona repuesto compatible...</option>
+                            <option th:each="p : ${parts}"
+                                    th:value="${p.id()}"
+                                    th:text="${p.name() + ' — $' + p.price() + ' (Stock: ' + p.stock() + ')'}"
+                                    th:selected="${item.partId() == p.id()}"
+                                    th:attr="data-model=${p.modelId()}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad</label>
+                        <input type="number" name="quantities" th:value="${item.quantity()}" min="1" step="1" class="mono" required>
+                    </div>
+                    <button type="button" class="remove-item" title="Quitar repuesto" aria-label="Quitar repuesto">✕</button>
+                </div>
+            </div>
+
+            <button type="button" id="addItem" class="btn btn-primary" style="min-height: 40px;">
+                + Agregar Repuesto
+            </button>
+
+            <!-- Plantilla clonada por repairs.js -->
+            <template id="itemTemplate">
+                <div class="repair-item">
+                    <div class="form-group">
+                        <label>Repuesto</label>
+                        <select name="partIds" required>
+                            <option value="">Selecciona repuesto compatible...</option>
+                            <option th:each="p : ${parts}"
+                                    th:value="${p.id()}"
+                                    th:text="${p.name() + ' — $' + p.price() + ' (Stock: ' + p.stock() + ')'}"
+                                    th:attr="data-model=${p.modelId()}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad</label>
+                        <input type="number" name="quantities" value="1" min="1" step="1" class="mono" required>
+                    </div>
+                    <button type="button" class="remove-item" title="Quitar repuesto" aria-label="Quitar repuesto">✕</button>
+                </div>
+            </template>
+
+            <!-- Ubicación Geográfica Opcional (repair-location.js) -->
+            <div class="form-section-title">3. Ubicación de Taller / Punto de Compra (Opcional)</div>
+
+            <div class="form-grid" style="margin-bottom: 1rem;">
+                <div class="form-group full-width">
+                    <label for="workshopName">Nombre del Taller o Tienda de Repuestos</label>
+                    <input type="text" id="workshopName" name="workshopName"
+                           th:value="${repair.workshopName()}"
+                           placeholder="Ej: Veloxa Sede Norte / Autopartes Tunja Centro">
+                </div>
+                <div class="form-group">
+                    <label for="workshopLatitude">Latitud</label>
+                    <input type="number" id="workshopLatitude" name="workshopLatitude"
+                           th:value="${repair.workshopLatitude()}"
+                           step="any" class="mono" placeholder="5.535280">
+                </div>
+                <div class="form-group">
+                    <label for="workshopLongitude">Longitud</label>
+                    <input type="number" id="workshopLongitude" name="workshopLongitude"
+                           th:value="${repair.workshopLongitude()}"
+                           step="any" class="mono" placeholder="-73.367780">
+                </div>
+            </div>
+
+            <div class="map-toolbar">
+                <span class="form-hint">Haz clic en el mapa o arrastra el marcador para fijar las coordenadas exactas.</span>
+                <button type="button" id="currentLocation" class="btn btn-ghost" style="min-height: 38px;">
+                    Usar mi Ubicación GPS
+                </button>
+            </div>
+
+            <div class="neo-map-frame">
+                <div id="repairLocationMap" class="neo-map-canvas"></div>
+            </div>
+            <p id="locationMessage" class="location-status-msg"></p>
+
+            <div class="form-actions">
+                <a th:href="@{/repairs}" class="btn btn-ghost">Cancelar</a>
+                <button type="submit" class="btn btn-accent">
+                    <span th:text="${repair.id() != null ? 'Guardar Cambios' : 'Registrar Reparación'}">Guardar</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </form>
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/ui :: footer}"></footer>
+<script th:src="@{/js/repairs.js}" defer></script>
+<script th:src="@{/js/repair-location.js}" defer></script>
 </body>
 </html>

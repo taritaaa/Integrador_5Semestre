@@ -1,133 +1,113 @@
 <!DOCTYPE html>
-<html lang="es"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/head :: head('Usuarios')}"></head>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Personal y Roles')}"></head>
 <body>
+
 <div th:replace="~{fragments/nav :: nav}"></div>
+<div th:replace="~{fragments/ui :: alerts}"></div>
 
-<main class="page-shell">
-    <div class="page-header">
-        <div class="page-header-copy">
-            <div class="breadcrumb">
-                <a th:href="@{/}">Inicio</a>
-                <span>/</span>
-                <span>Usuarios</span>
-            </div>
-            <h1>Usuarios del sistema</h1>
-            <p>Administración de cuentas, roles de acceso y estado operativo del equipo del taller.</p>
-        </div>
+<main class="app-main fade-in">
 
-        <div class="page-actions">
-            <a class="btn btn-accent" th:href="@{/users/new}">+ Registrar usuario</a>
-        </div>
-    </div>
+    <nav class="breadcrumb-trail" aria-label="Ruta de navegación">
+        <a th:href="@{/}">Panel</a>
+        <span class="breadcrumb-sep">//</span>
+        <span>Usuarios y Roles</span>
+    </nav>
 
-    <p class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></p>
-    <p class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
-
-    <!-- Contraseña temporal del usuario recién creado (permanece visible hasta que el admin salga de la vista) -->
-    <section class="secret-banner" th:if="${tempPassword}" role="status" aria-live="polite">
-        <div class="secret-banner-copy">
-            <div class="secret-banner-title">
-                Contraseña temporal generada para <span th:text="${tempEmail}"></span>
-            </div>
-            <p class="secret-banner-hint">
-                Cópiela ahora: por seguridad no se volverá a mostrar. El usuario deberá cambiarla en su primer ingreso.
+    <header class="page-header">
+        <div>
+            <div class="page-eyebrow">MOD // 05 • Solo Administrador</div>
+            <h1 class="page-title">Personal y Accesos</h1>
+            <p class="page-subtitle">
+                Gestión de administradores y mecánicos, estado de cuentas y emisión de contraseñas temporales.
             </p>
         </div>
-
-        <div class="secret-code-box">
-            <code id="tempPasswordValue" th:text="${tempPassword}"></code>
-            <button type="button" id="copyTempPasswordBtn" class="btn btn-secondary btn-sm">Copiar</button>
+        <div class="page-actions">
+            <a th:href="@{/users/new}" class="btn btn-accent">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Nuevo Usuario</span>
+            </a>
         </div>
+    </header>
+
+    <!-- Banner de Contraseña Temporal de Uso Único (UserController RF-06) -->
+    <section th:if="${tempPassword != null}" class="temp-secret-banner fade-in" role="alert">
+        <div>
+            <div class="page-eyebrow" style="color: var(--brand-orange-bright); margin-bottom: 0.25rem;">
+                Credencial Temporal — Visualización Única
+            </div>
+            <p style="font-size: 0.92rem; color: var(--text-primary);">
+                Entrega esta clave al usuario <strong class="mono" th:text="${tempEmail}">correo</strong>.
+                El sistema le exigirá cambiarla en su primer ingreso.
+            </p>
+        </div>
+        <div class="temp-secret-code" th:text="${tempPassword}">TEMP1234!</div>
     </section>
 
-    <section class="card empty-state" th:if="${#lists.isEmpty(users)}">
-        <h3>No hay usuarios registrados</h3>
-        <p>Crea la primera cuenta de mecánico o administrador para empezar.</p>
-        <a class="btn" th:href="@{/users/new}">+ Registrar usuario</a>
-    </section>
+    <div th:if="${#lists.isEmpty(users)}">
+        <div th:replace="~{fragments/ui :: emptyState(
+            'Sin usuarios registrados',
+            'Crea cuentas para los mecánicos y administradores del taller.',
+            @{/users/new},
+            '+ Registrar Usuario'
+        )}"></div>
+    </div>
 
-    <section class="table-wrap" th:unless="${#lists.isEmpty(users)}">
-        <table>
+    <section th:if="${!#lists.isEmpty(users)}" class="table-shell fade-in-1">
+        <table class="neo-table">
             <thead>
             <tr>
-                <th>ID</th>
                 <th>Usuario</th>
-                <th>Correo</th>
+                <th>Documento</th>
+                <th>Correo Electrónico</th>
+                <th>Teléfono</th>
                 <th>Rol</th>
                 <th>Estado</th>
-                <th>Acciones</th>
+                <th class="col-actions">Acciones</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="u : ${users}">
-                <td class="mono" th:text="'#' + ${u.id()}"></td>
-                <td>
-                    <div class="user-cell">
-                        <span class="user-avatar"
-                              th:text="${#strings.substring(u.name(), 0, 1)}"
-                              aria-hidden="true">U</span>
-                        <div>
-                            <strong th:text="${u.name()}"></strong>
-                            <span class="badge badge-info"
-                                  style="margin-left: 0.35rem;"
-                                  th:if="${#authentication.name == u.email()}">Tú</span>
-                        </div>
-                    </div>
+                <td data-label="Usuario">
+                    <strong th:text="${u.name()}">Nombre Usuario</strong>
                 </td>
-                <td class="mono" th:text="${u.email()}"></td>
-                <td>
-                    <span class="role-chip"
-                          th:classappend="${#strings.toString(u.role()) == 'ADMIN'} ? ' role-admin' : ' role-mechanic'"
-                          th:text="${u.role()}"></span>
+                <td data-label="Documento">
+                    <span class="mono" style="font-size: 0.84rem;" th:text="${u.document()}">102030</span>
                 </td>
-                <td>
-                    <span class="badge badge-success" th:if="${u.active()}">Activa</span>
-                    <span class="badge badge-neutral" th:unless="${u.active()}">Desactivada</span>
+                <td data-label="Correo">
+                    <span class="mono" style="font-size: 0.84rem;" th:text="${u.email()}">user@taller.test</span>
                 </td>
-                <td>
-                    <div class="table-actions">
-                        <a class="btn btn-secondary btn-sm" th:href="@{/users/{id}(id=${u.id()})}">Ver</a>
-                        <a class="btn btn-secondary btn-sm" th:href="@{/users/{id}/edit(id=${u.id()})}">Editar</a>
-
-                        <!-- El botón no aparece en la fila del propio administrador -->
-                        <form class="inline-delete-form"
-                              th:unless="${#authentication.name == u.email()}"
-                              th:action="@{/users/{id}(id=${u.id()})}"
-                              method="post"
-                              data-no-guard="true"
-                              onsubmit="return confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.');">
-                            <input type="hidden" name="_method" value="delete">
-                            <button type="submit" class="btn btn-danger-soft btn-sm">Eliminar</button>
-                        </form>
-                    </div>
+                <td data-label="Teléfono">
+                    <span class="mono" style="font-size: 0.84rem;" th:text="${u.phone()}">3001234567</span>
+                </td>
+                <td data-label="Rol">
+                        <span class="neo-badge"
+                              th:classappend="${u.role() != null and u.role().name() == 'ADMIN' ? ' badge-warning' : ' badge-info'}"
+                              th:text="${u.role() != null and u.role().name() == 'ADMIN' ? 'Administrador' : 'Mecánico'}">Mecánico</span>
+                </td>
+                <td data-label="Estado">
+                        <span th:if="${u.active() == true}" class="neo-badge badge-success">
+                            <span class="neo-badge-dot"></span>Activo
+                        </span>
+                    <span th:if="${u.active() != true}" class="neo-badge badge-danger">
+                            <span class="neo-badge-dot"></span>Inactivo
+                        </span>
+                </td>
+                <td data-label="Acciones" class="col-actions">
+                    <div th:replace="~{fragments/ui :: crudActions(
+                            @{/users/{id}(id=${u.id()})},
+                            @{/users/{id}/edit(id=${u.id()})},
+                            @{/users/{id}(id=${u.id()})},
+                            '¿Eliminar este usuario? Solo se permite si no tiene reparaciones asociadas.'
+                        )}"></div>
                 </td>
             </tr>
             </tbody>
         </table>
     </section>
+
 </main>
 
-<script th:if="${tempPassword}">
-    (function () {
-        var btn = document.getElementById('copyTempPasswordBtn');
-        var code = document.getElementById('tempPasswordValue');
-        if (!btn || !code) return;
-        btn.addEventListener('click', function () {
-            var value = code.textContent.trim();
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(value).then(function () {
-                    btn.textContent = 'Copiada';
-                    if (window.taller && window.taller.toast) {
-                        window.taller.toast('success', 'Contraseña temporal copiada al portapapeles.');
-                    }
-                    setTimeout(function () { btn.textContent = 'Copiar'; }, 2200);
-                });
-            }
-        });
-    })();
-</script>
+<footer th:replace="~{fragments/ui :: footer}"></footer>
 </body>
 </html>

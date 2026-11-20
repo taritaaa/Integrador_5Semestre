@@ -136,12 +136,13 @@
         </svg>
     </a>
 
-    <!-- Eliminar Registro (Mantiene CSRF, data-no-guard="true" y confirm) -->
+    <!-- Eliminar Registro (Compatible con @DeleteMapping("/{id}") + CSRF + data-no-guard) -->
     <form th:if="${deleteUrl != null}"
           th:action="${deleteUrl}"
           method="post"
           data-no-guard="true"
           th:attr="onsubmit=|return confirm('${confirmMsg != null ? confirmMsg : '¿Confirmas eliminar este registro? Esta acción no se puede deshacer.'}')|">
+        <input type="hidden" name="_method" value="delete">
         <button type="submit"
                 class="action-btn-delete"
                 data-tooltip="Eliminar registro"
