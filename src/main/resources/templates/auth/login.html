@@ -157,7 +157,7 @@
             var current = document.documentElement.getAttribute('data-theme') || 'dark';
             var next = (current === 'dark') ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', next);
-            document.body.classList.toggle('light-theme', next === 'light');git pu
+            document.body.classList.toggle('light-theme', next === 'light');
             try {
                 localStorage.setItem('veloxa-theme', next);
                 localStorage.setItem('theme', next);
