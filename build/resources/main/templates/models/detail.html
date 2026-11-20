@@ -1,57 +1,62 @@
-
 <!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Detalle del modelo - Taller</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-</head>
-
+<head th:replace="~{fragments/head :: head('Detalle del modelo')}"></head>
 <body>
-
 <div th:replace="~{fragments/nav :: nav}"></div>
 
-<h1>Detalle del modelo</h1>
+<main class="page-shell">
+    <div class="page-header">
+        <div class="page-header-copy">
+            <div class="breadcrumb">
+                <a th:href="@{/}">Inicio</a>
+                <span>/</span>
+                <a th:href="@{/models}">Modelos</a>
+                <span>/</span>
+                <span th:text="${vehicleModel.name()}">Detalle</span>
+            </div>
+            <h1 th:text="${vehicleModel.brand() + ' ' + vehicleModel.name()}">Detalle del modelo</h1>
+            <p>Especificaciones técnicas y regla de placa colombiana asociada al tipo de vehículo.</p>
+        </div>
 
-<!-- Datos del modelo -->
-<p>
-    <strong>ID:</strong>
-    <span th:text="${vehicleModel.id()}"></span>
-</p>
+        <div class="page-actions">
+            <a class="btn btn-secondary" th:href="@{/models}">&larr; Volver al listado</a>
+            <a class="btn" sec:authorize="hasRole('ADMIN')" th:href="@{/models/{id}/edit(id=${vehicleModel.id()})}">
+                Editar modelo
+            </a>
+        </div>
+    </div>
 
-<p>
-    <strong>Nombre:</strong>
-    <span th:text="${vehicleModel.name()}"></span>
-</p>
+    <section class="card">
+        <div class="card-header">
+            <h2>Información del modelo</h2>
+            <span class="badge badge-info" th:text="${vehicleModel.vehicleTypeLabel()}"></span>
+        </div>
 
-<p>
-    <strong>Marca:</strong>
-    <span th:text="${vehicleModel.brand()}"></span>
-</p>
-
-<p>
-    <strong>Tipo de vehículo:</strong>
-    <span th:text="${vehicleModel.vehicleTypeLabel()}"></span>
-</p>
-
-<p>
-    <strong>Formato de placa:</strong>
-    <span th:text="${vehicleModel.plateFormat()}"></span>
-</p>
-
-<!-- Acciones -->
-<a sec:authorize="hasRole('ADMIN')"
-   th:href="@{/models/{id}/edit(id=${vehicleModel.id()})}">
-    Editar
-</a>
-
-<a th:href="@{/models}">
-    Volver al listado
-</a>
-
+        <dl class="detail-grid">
+            <div class="detail-item">
+                <dt>ID de registro</dt>
+                <dd class="mono" th:text="'#' + ${vehicleModel.id()}"></dd>
+            </div>
+            <div class="detail-item">
+                <dt>Nombre / Línea</dt>
+                <dd th:text="${vehicleModel.name()}"></dd>
+            </div>
+            <div class="detail-item">
+                <dt>Marca</dt>
+                <dd th:text="${vehicleModel.brand()}"></dd>
+            </div>
+            <div class="detail-item">
+                <dt>Tipo de vehículo</dt>
+                <dd th:text="${vehicleModel.vehicleTypeLabel()}"></dd>
+            </div>
+            <div class="detail-item">
+                <dt>Formato de placa</dt>
+                <dd class="mono" th:text="${vehicleModel.plateFormat()}"></dd>
+            </div>
+        </dl>
+    </section>
+</main>
 </body>
 </html>

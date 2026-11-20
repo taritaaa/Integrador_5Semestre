@@ -1,55 +1,87 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Repuestos compatibles - Taller</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-</head>
+<head th:replace="~{fragments/head :: head('Repuestos compatibles')}"></head>
 <body>
 <div th:replace="~{fragments/nav :: nav}"></div>
 
-<h1>Repuestos compatibles con un modelo</h1>
+<main class="page-shell">
+    <div class="page-header">
+        <div class="page-header-copy">
+            <div class="breadcrumb">
+                <a th:href="@{/}">Inicio</a>
+                <span>/</span>
+                <a th:href="@{/parts}">Repuestos</a>
+                <span>/</span>
+                <span>Compatibles</span>
+            </div>
+            <h1>Repuestos compatibles por modelo</h1>
+            <p>Consulta qué referencias del inventario corresponden a un modelo específico de vehículo.</p>
+        </div>
 
-<form method="get" th:action="@{/parts/compatible}">
-    <label for="modelId">Modelo</label>
-    <select id="modelId" name="modelId" required>
-        <option value="">Seleccione un modelo</option>
-        <option th:each="m : ${models}" th:value="${m.id()}" th:text="${m.name() + ' - ' + m.brand()}"
-                th:selected="${selectedModelId != null and selectedModelId == m.id()}"></option>
-    </select>
-    <button type="submit">Buscar</button>
-</form>
+        <div class="page-actions">
+            <a class="btn btn-secondary" th:href="@{/parts}">&larr; Volver a repuestos</a>
+        </div>
+    </div>
 
-<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+    <form class="filter-bar" method="get" th:action="@{/parts/compatible}">
+        <div class="filter-field">
+            <label for="modelId">Modelo de vehículo</label>
+            <select id="modelId" name="modelId" required>
+                <option value="">Seleccione un modelo</option>
+                <option th:each="m : ${models}"
+                        th:value="${m.id()}"
+                        th:text="${m.name() + ' - ' + m.brand()}"
+                        th:selected="${selectedModelId != null and selectedModelId == m.id()}"></option>
+            </select>
+        </div>
 
-<div th:if="${searched}">
-    <p th:if="${parts.isEmpty()}">No hay repuestos registrados para este modelo.</p>
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-accent">Buscar compatibles</button>
+        </div>
+    </form>
 
-    <table th:if="${!parts.isEmpty()}">
-        <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Código de barras</th>
-            <th>Precio</th>
-            <th>Stock</th>
-            <th>Detalle</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="p : ${parts}">
-            <td th:text="${p.name()}"></td>
-            <td th:text="${p.ean()}"></td>
-            <td th:text="${'$ ' + #numbers.formatDecimal(p.price(), 1, 'POINT', 2, 'COMMA')}"></td>
-            <td>
-                <span th:if="${p.stock() == 0}"><strong>Agotado</strong></span>
-                <span th:if="${p.stock() > 0}" th:text="${p.stock()}"></span>
-            </td>
-            <td><a th:href="@{/parts/{id}(id=${p.id()})}">Ver</a></td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+    <p class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
 
-<a th:href="@{/parts}">Volver a repuestos</a>
+    <div th:if="${searched}">
+        <section class="card empty-state" th:if="${parts.isEmpty()}">
+            <h3>Sin repuestos compatibles</h3>
+            <p>No hay repuestos registrados para el modelo seleccionado.</p>
+        </section>
+
+        <section class="table-wrap" th:if="${!parts.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Código de barras</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Detalle</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${parts}">
+                    <td><strong th:text="${p.name()}"></strong></td>
+                    <td><span class="ean-code" th:text="${p.ean()}"></span></td>
+                    <td>
+                        <span class="price-tag"
+                              th:text="${'$ ' + #numbers.formatDecimal(p.price(), 1, 'POINT', 2, 'COMMA')}"></span>
+                    </td>
+                    <td>
+                        <span class="badge badge-danger badge-pulse" th:if="${p.stock() == 0}">Agotado</span>
+                        <span class="badge badge-warning" th:if="${p.stock() > 0 and p.stock() <= 5}"
+                              th:text="${p.stock() + ' uds · Bajo'}"></span>
+                        <span class="badge badge-success" th:if="${p.stock() > 5}"
+                              th:text="${p.stock() + ' uds'}"></span>
+                    </td>
+                    <td>
+                        <a class="btn btn-secondary btn-sm" th:href="@{/parts/{id}(id=${p.id()})}">Ver</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+</main>
 </body>
 </html>

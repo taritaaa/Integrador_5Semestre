@@ -1,65 +1,172 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Iniciar sesión')}"></head>
-<body class="auth-body">
-<div th:replace="~{fragments/ui :: ui}"></div>
+<head th:replace="~{fragments/head :: head('Iniciar Sesión')}"></head>
+<body>
 
-<section class="auth-split" aria-label="Acceso al sistema">
-    <!-- Panel de identidad del taller -->
-    <aside class="auth-hero">
-        <div>
-            <span class="auth-hero-badge">SISTEMA DE GESTIÓN AUTOMOTRIZ</span>
-            <h2>Control integral de reparaciones, vehículos e inventario</h2>
-            <p>Plataforma operativa para administradores y mecánicos con trazabilidad completa en taller.</p>
-        </div>
+<div class="auth-stage fade-in">
 
-        <ul class="auth-features">
-            <li><span class="auth-features-dot"></span>Validación de placas colombianas y modelos compatibles</li>
-            <li><span class="auth-features-dot"></span>Control transaccional de repuestos y precios históricos</li>
-            <li><span class="auth-features-dot"></span>Geolocalización interactiva de órdenes de reparación</li>
-        </ul>
-    </aside>
+    <!-- ==================================================================
+         CAPAS DE FONDO A PANTALLA COMPLETA (CROSSFADE OSCURO <-> CLARO)
+         Ajusta únicamente el nombre del archivo si tus fotos tienen otro nombre
+         ================================================================== -->
+    <div class="auth-bg-layer auth-bg-dark"
+         th:style="|background-image: url('@{/images/hero/auto-hero-oscuro.jpg}');|"
+         aria-hidden="true"></div>
 
-    <!-- Panel de formulario -->
-    <div class="auth-panel">
-        <div class="auth-header">
-            <div class="brand">
-                <span class="brand-mark" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+    <div class="auth-bg-layer auth-bg-light"
+         th:style="|background-image: url('@{/images/hero/auto-hero-claro.jpg}');|"
+         aria-hidden="true"></div>
+
+    <!-- Velo atmosférico continuo (sin división vertical) -->
+    <div class="auth-atmosphere-veil" aria-hidden="true"></div>
+
+    <!-- Contenido unificado sobre el escenario -->
+    <div class="auth-shell">
+
+        <!-- Barra Superior Continua -->
+        <header class="auth-topbar">
+            <a th:href="@{/login}" class="veloxa-brand" aria-label="Veloxa Service">
+                <span class="auth-brand-logo">
+                    <img th:src="@{/images/brand/logo-sin-fondo.png}"
+                         alt="Veloxa Service"
+                         class="veloxa-logo-img">
+                </span>
+                <span class="veloxa-brand-copy">
+                    <span class="veloxa-brand-title">Veloxa</span>
+                </span>
+            </a>
+
+            <div class="auth-topbar-right">
+                <span class="auth-status-tag">
+                    <span class="auth-status-dot"></span>
+                    <span>MJS</span>
+                </span>
+
+                <button type="button"
+                        class="theme-switch"
+                        data-theme-toggle="true"
+                        aria-label="Cambiar entre modo oscuro y modo claro"
+                        data-tooltip="Modo Oscuro / Claro">
+                    <span class="theme-switch-thumb" aria-hidden="true"></span>
+                    <svg class="theme-switch-icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.2" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
-                </span>
-                <span class="brand-text">
-                    <strong>TallerPro</strong>
-                    <small>Acceso seguro</small>
-                </span>
+                    <svg class="theme-switch-icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
             </div>
-            <h1>Iniciar sesión</h1>
-            <p>Ingresa tus credenciales para acceder a tu panel de trabajo.</p>
-        </div>
+        </header>
 
-        <p class="alert alert-error" th:if="${param.error}">Correo o contraseña incorrectos, o la cuenta está desactivada.</p>
-        <p class="alert alert-success" th:if="${param.logout}">Sesión cerrada correctamente.</p>
-        <p class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></p>
+        <!-- Escenario Principal: Editorial Izquierda + Tarjeta Glass Derecha -->
+        <main class="auth-content-grid">
 
-        <form method="post" th:action="@{/login}">
-            <div class="form-group">
-                <label for="email">Correo electrónico</label>
-                <input type="email" id="email" name="email" placeholder="nombre@taller.com" autocomplete="username" required autofocus>
-            </div>
+            <!-- Columna Editorial -->
+            <section class="auth-editorial fade-in-1">
+                <div class="hero-eyebrow">Sistema de Gestión Automotriz</div>
+                <h1 class="auth-editorial-title">
+                    Control Integral<br>
+                    de Taller<span style="color: var(--brand-orange);">.</span>
+                </h1>
+                <p class="auth-editorial-desc">
+                    Plataforma operativa para administradores y mecánicos con trazabilidad completa en cada orden de
+                    trabajo.
+                </p>
+            </section>
 
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
-            </div>
+            <!-- Tarjeta Flotante Glassmorphic -->
+            <section class="auth-card fade-in-2" aria-label="Formulario de inicio de sesión">
+                <div class="auth-card-head">
+                    <div class="auth-card-eyebrow">Veloxa Service • Credenciales</div>
+                    <h2 class="auth-card-title">Iniciar Sesión</h2>
+                    <p class="auth-card-subtitle">Ingresa tus credenciales para acceder a tu panel de trabajo.</p>
+                </div>
 
-            <button type="submit" class="btn btn-lg btn-block">Ingresar al sistema</button>
-        </form>
+                <!-- Alertas de Spring Security y Flash -->
+                <div th:if="${param.error}" class="auth-inline-alert error" role="alert">
+                    <span>Correo o contraseña incorrectos, o cuenta deshabilitada.</span>
+                </div>
+                <div th:if="${param.logout}" class="auth-inline-alert info" role="status">
+                    <span>Has cerrado sesión correctamente.</span>
+                </div>
+                <div th:if="${errorMessage}" class="auth-inline-alert error" role="alert">
+                    <span th:text="${errorMessage}"></span>
+                </div>
+                <div th:if="${successMessage}" class="auth-inline-alert success" role="status">
+                    <span th:text="${successMessage}"></span>
+                </div>
 
-        <div class="auth-footer auth-footer-center">
-            <a th:href="@{/forgot-password}">¿Olvidó su contraseña?</a>
-        </div>
+                <form th:action="@{/login}" method="post" class="auth-form">
+                    <div class="form-group">
+                        <label for="username">Correo Electrónico</label>
+                        <input type="email"
+                               id="username"
+                               name="username"
+                               placeholder="usuario@veloxa.co"
+                               autocomplete="username"
+                               required
+                               autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               placeholder="••••••••••••"
+                               autocomplete="current-password"
+                               required>
+                    </div>
+
+                    <button type="submit" class="btn btn-accent" style="width: 100%; margin-top: 0.35rem;">
+                        <span>Ingresar al Sistema</span>
+                        <span>→</span>
+                    </button>
+
+                    <div class="auth-links">
+                        <a th:href="@{/forgot-password}">¿Olvidó su contraseña?</a>
+                    </div>
+                </form>
+            </section>
+
+        </main>
+
+        <!-- Pie Continuo -->
+        <footer class="auth-bottom-bar">
+            <span>Veloxa Service</span>
+        </footer>
+
     </div>
-</section>
+</div>
+
+<script>
+    (function () {
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-theme-toggle="true"]');
+            if (!btn) return;
+            var current = document.documentElement.getAttribute('data-theme') || 'dark';
+            var next = (current === 'dark') ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            document.body.classList.toggle('light-theme', next === 'light');
+            try {
+                localStorage.setItem('veloxa-theme', next);
+                localStorage.setItem('theme', next);
+            } catch (err) {}
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', next === 'light' ? '#f8fafc' : '#050811');
+        });
+    })();
+</script>
+
 </body>
 </html>

@@ -1,163 +1,68 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:replace="~{fragments/head :: head('Ubicación de la tienda')}"></th:block>
+    <meta charset="UTF-8">
+    <title>Ubicación de la taller - Taller</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
-<div th:replace="~{fragments/nav :: nav}"></div>
+<h1>Ubicación de la taller</h1>
+<p>Reparación <strong th:text="${'#' + repair.id() + ' - ' + repair.licensePlate()}"></strong>:
+    marque en el mapa dónde se realizó la reparación.</p>
 
-<main class="page-shell">
-    <div class="page-header">
-        <div class="page-header-copy">
-            <div class="breadcrumb">
-                <a th:href="@{/}">Inicio</a>
-                <span>/</span>
-                <a th:href="@{/repairs}">Reparaciones</a>
-                <span>/</span>
-                <a th:href="@{/repairs/{id}(id=${repair.id()})}" th:text="'#' + ${repair.id()}"></a>
-                <span>/</span>
-                <span>Ubicación</span>
-            </div>
-            <h1>Ubicación de la tienda</h1>
-            <p>
-                Reparación <strong class="mono" th:text="'#' + ${repair.id()}"></strong> &middot;
-                Vehículo <span class="colombia-plate" th:text="${repair.licensePlate()}"></span>:
-                marca en el mapa el lugar donde se compró el repuesto.
-            </p>
-        </div>
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
 
-        <div class="page-actions">
-            <a class="btn btn-secondary" th:href="@{/repairs/{id}(id=${repair.id()})}">&larr; Volver al detalle</a>
-        </div>
-    </div>
+<form method="post" th:action="@{/repairs/{id}/location(id=${repair.id()})}">
+    <input type="hidden" name="_method" value="put">
 
-    <p class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+    <label for="workshopName">Nombre de la taller</label>
+    <input type="text" id="workshopName" name="workshopName" maxlength="100" required
+           th:value="${repair.workshopName()}">
 
-    <section class="card">
-        <form id="locationForm" method="post" th:action="@{/repairs/{id}/location(id=${repair.id()})}">
-            <input type="hidden" name="_method" value="put">
-            <input type="hidden" id="latitude" name="latitude" th:value="${repair.workshopLatitude()}">
-            <input type="hidden" id="longitude" name="longitude" th:value="${repair.workshopLongitude()}">
+    <input type="hidden" id="latitude" name="latitude" th:value="${repair.workshopLatitude()}">
+    <input type="hidden" id="longitude" name="longitude" th:value="${repair.workshopLongitude()}">
 
-            <div class="form-group">
-                <label for="workshopName">Nombre de la tienda o almacén</label>
-                <input type="text"
-                       id="workshopName"
-                       name="workshopName"
-                       maxlength="100"
-                       placeholder="Ej: Repuestos El Motor Tunja, Autorepuestos Centro"
-                       required
-                       th:value="${repair.workshopName()}">
-            </div>
+    <p>Haga clic en el mapa para marcar el punto. Punto elegido: <strong id="selected">ninguno</strong></p>
+    <div id="map" style="height: 400px;"></div>
 
-            <div class="map-toolbar">
-                <div class="coords-pill">
-                    <span>Punto elegido:</span>
-                    <strong id="selected">ninguno</strong>
-                </div>
-                <button type="button" id="useMyLocationBtn" class="btn btn-secondary btn-sm">
-                    Usar mi ubicación actual
-                </button>
-            </div>
-
-            <p id="locationHint" class="form-hint" style="margin-bottom: 0.75rem;">
-                Haz clic en cualquier punto del mapa para colocar el marcador. También puedes arrastrarlo para ajustar la precisión.
-            </p>
-
-            <div id="map" class="map-canvas"></div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn btn-accent">Guardar ubicación</button>
-                <a class="btn btn-secondary" th:href="@{/repairs/{id}(id=${repair.id()})}">Cancelar</a>
-            </div>
-        </form>
-    </section>
-</main>
+    <button type="submit">Guardar ubicación</button>
+    <a th:href="@{/repairs/{id}(id=${repair.id()})}">Cancelar</a>
+</form>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script th:inline="javascript">
-    (function () {
-        const savedLat = /*[[${repair.workshopLatitude()}]]*/ null;
-        const savedLng = /*[[${repair.workshopLongitude()}]]*/ null;
-        const hasPoint = savedLat !== null && savedLng !== null;
+    const savedLat = /*[[${repair.workshopLatitude()}]]*/ null;
+    const savedLng = /*[[${repair.workshopLongitude()}]]*/ null;
+    const hasPoint = savedLat !== null && savedLng !== null;
 
-        // Si ya hay un punto se centra ahí; si no, se muestra Colombia completa
-        const map = L.map('map').setView(hasPoint ? [savedLat, savedLng] : [4.5709, -74.2973], hasPoint ? 15 : 6);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
+    // Si ya hay un punto se centra ahí; si no, se muestra Colombia completa
+    const map = L.map('map').setView(hasPoint ? [savedLat, savedLng] : [4.5709, -74.2973], hasPoint ? 15 : 6);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
 
-        const latInput = document.getElementById('latitude');
-        const lngInput = document.getElementById('longitude');
-        const selectedLabel = document.getElementById('selected');
-        const hint = document.getElementById('locationHint');
-        const gpsBtn = document.getElementById('useMyLocationBtn');
-        const form = document.getElementById('locationForm');
+    let marker = null;
 
-        let marker = null;
-
-        function setPoint(lat, lng, centerMap) {
-            if (marker === null) {
-                marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-                marker.on('dragend', function () {
-                    const pos = marker.getLatLng();
-                    setPoint(pos.lat, pos.lng, false);
-                });
-            } else {
-                marker.setLatLng([lat, lng]);
-            }
-            latInput.value = lat;
-            lngInput.value = lng;
-            selectedLabel.textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
-            if (centerMap) {
-                map.setView([lat, lng], 16);
-            }
+    function setPoint(lat, lng) {
+        if (marker === null) {
+            marker = L.marker([lat, lng]).addTo(map);
+        } else {
+            marker.setLatLng([lat, lng]);
         }
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+        document.getElementById('selected').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
+    }
 
-        if (hasPoint) {
-            setPoint(savedLat, savedLng, false);
-        }
+    if (hasPoint) {
+        setPoint(savedLat, savedLng);
+    }
 
-        map.on('click', function (e) {
-            setPoint(e.latlng.lat, e.latlng.lng, false);
-        });
-
-        if (gpsBtn) {
-            gpsBtn.addEventListener('click', function () {
-                if (!navigator.geolocation) {
-                    if (window.taller && window.taller.toast) {
-                        window.taller.toast('error', 'Este navegador no soporta geolocalización.');
-                    }
-                    return;
-                }
-                hint.textContent = 'Obteniendo ubicación actual...';
-                navigator.geolocation.getCurrentPosition(
-                    function (pos) {
-                        setPoint(pos.coords.latitude, pos.coords.longitude, true);
-                        hint.textContent = 'Ubicación actual marcada. Puedes arrastrar el marcador para ajustarla.';
-                    },
-                    function () {
-                        hint.textContent = 'No se pudo obtener el GPS. Marca el punto directamente sobre el mapa.';
-                        if (window.taller && window.taller.toast) {
-                            window.taller.toast('info', 'Permiso de GPS denegado o no disponible. Haz clic en el mapa.');
-                        }
-                    },
-                    { enableHighAccuracy: true, timeout: 10000 }
-                );
-            });
-        }
-
-        form.addEventListener('submit', function (ev) {
-            if (!latInput.value || !lngInput.value) {
-                ev.preventDefault();
-                if (window.taller && window.taller.toast) {
-                    window.taller.toast('error', 'Primero haz clic en el mapa para seleccionar la ubicación.');
-                }
-            }
-        });
-    })();
+    map.on('click', function (e) {
+        setPoint(e.latlng.lat, e.latlng.lng);
+    });
 </script>
 </body>
 </html>

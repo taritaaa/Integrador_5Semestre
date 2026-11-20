@@ -1,131 +1,145 @@
+
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <th:block th:replace="~{fragments/head :: head('Mapa de tiendas')}"></th:block>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <meta charset="UTF-8">
+    <title>Mapa de reparaciones - Taller</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 </head>
+
 <body>
+
 <div th:replace="~{fragments/nav :: nav}"></div>
 
-<main class="page-shell">
-    <div class="page-header">
-        <div class="page-header-copy">
-            <div class="breadcrumb">
-                <a th:href="@{/}">Inicio</a>
-                <span>/</span>
-                <a th:href="@{/repairs}">Reparaciones</a>
-                <span>/</span>
-                <span>Mapa de tiendas</span>
-            </div>
-            <h1>Mapa de tiendas de repuestos</h1>
-            <p>Visualización georreferenciada de los puntos donde se compraron los repuestos de cada reparación.</p>
-        </div>
+<h1>Ubicaciones de reparaciones</h1>
 
-        <div class="page-actions">
-            <span class="badge badge-info" th:text="${locations.size() + ' ubicaciones registradas'}"></span>
-            <a class="btn btn-secondary" th:href="@{/repairs}">&larr; Volver al historial</a>
-        </div>
+<p>
+    Consulte los lugares donde se realizaron las
+    reparaciones de un vehículo.
+</p>
+
+<!-- Buscar por placa -->
+<form method="get"
+      th:action="@{/repairs/map}">
+
+    <label for="plate">Placa del vehículo</label>
+
+    <input type="text"
+           id="plate"
+           name="plate"
+           placeholder="Ejemplo: SIW-234"
+           th:value="${plate}">
+
+    <button type="submit">
+        Buscar ubicaciones
+    </button>
+
+    <a th:href="@{/repairs/map}">
+        Ver todas
+    </a>
+
+</form>
+
+<!-- Resultado -->
+<h2>Mapa de ubicaciones</h2>
+
+<p th:if="${#lists.isEmpty(locations)}">
+    No se encontraron reparaciones con ubicación
+    registrada para esta búsqueda.
+</p>
+
+<p th:unless="${#lists.isEmpty(locations)}">
+    Ubicaciones registradas:
+    <strong th:text="${#lists.size(locations)}"></strong>
+</p>
+
+<!-- Mapa Leaflet -->
+<div id="repairHistoryMap"
+     style="height: 500px; width: 100%;">
+</div>
+
+<!-- Información para JavaScript -->
+<div id="locationsData" hidden>
+
+    <div class="location-point"
+         th:each="loc : ${locations}"
+
+         th:attr="data-id=${loc.repairId()},
+                  data-plate=${loc.licensePlate()},
+                  data-name=${loc.workshopName()},
+                  data-lat=${loc.latitude()},
+                  data-lng=${loc.longitude()},
+                  data-type=${loc.type()},
+                  data-status=${loc.status()}">
     </div>
 
-    <div class="alert alert-info" th:if="${locations.isEmpty()}">
-        Aún no hay ubicaciones registradas. Puedes registrarlas entrando al detalle de cada reparación.
-    </div>
+</div>
 
-    <section class="card">
-        <div class="map-toolbar">
-            <span>Haz clic en cualquier marcador para consultar la placa, estado y acceder a la orden de reparación.</span>
-            <button type="button" id="fitAllBtn" class="btn btn-secondary btn-sm" th:if="${!locations.isEmpty()}">
-                Centrar todos los puntos
-            </button>
-        </div>
+<!-- Lista de ubicaciones encontradas -->
+<h2>Historial de ubicaciones</h2>
 
-        <div id="map" class="map-canvas map-canvas-lg"></div>
-    </section>
-</main>
+<p th:if="${#lists.isEmpty(locations)}">
+    No hay ubicaciones disponibles.
+</p>
 
+<table th:unless="${#lists.isEmpty(locations)}">
+
+    <thead>
+    <tr>
+        <th>Reparación</th>
+        <th>Placa</th>
+        <th>Taller</th>
+        <th>Latitud</th>
+        <th>Longitud</th>
+        <th>Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+
+    <tr th:each="loc : ${locations}">
+
+        <td th:text="${loc.repairId()}"></td>
+
+        <td th:text="${loc.licensePlate()}"></td>
+
+        <td th:text="${loc.workshopName()}"></td>
+
+        <td th:text="${loc.latitude()}"></td>
+
+        <td th:text="${loc.longitude()}"></td>
+
+        <td>
+            <a th:href="@{/repairs/{id}(id=${loc.repairId()})}">
+                Ver reparación
+            </a>
+        </td>
+
+    </tr>
+
+    </tbody>
+
+</table>
+
+<p>
+    <a th:href="@{/repairs}">
+        Volver al historial
+    </a>
+</p>
+
+<!-- Leaflet -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script th:inline="javascript">
-    (function () {
-        const locations = /*[[${locations}]]*/ [];
 
-        const map = L.map('map').setView([4.5709, -74.2973], 6);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
+<!-- JavaScript del proyecto -->
+<script th:src="@{/js/repair-history-map.js}"></script>
 
-        // Agrupar reparaciones en las mismas coordenadas para separarlas visualmente sin solaparlas
-        const groups = {};
-        locations.forEach(function (loc) {
-            const key = Number(loc.latitude).toFixed(6) + ',' + Number(loc.longitude).toFixed(6);
-            if (!groups[key]) {
-                groups[key] = [];
-            }
-            groups[key].push(loc);
-        });
-
-        const bounds = [];
-        Object.keys(groups).forEach(function (key) {
-            const group = groups[key];
-            group.forEach(function (loc, index) {
-                const lat = Number(loc.latitude);
-                const lng = Number(loc.longitude);
-                let markerLat = lat;
-                let markerLng = lng;
-
-                if (group.length > 1) {
-                    const angle = (2 * Math.PI * index) / group.length;
-                    const distance = 0.00012;
-                    markerLat = lat + Math.cos(angle) * distance;
-                    markerLng = lng + Math.sin(angle) * distance;
-                }
-
-                const popup = document.createElement('div');
-
-                const title = document.createElement('strong');
-                title.className = 'map-popup-title';
-                title.textContent = loc.workshopName || 'Tienda sin nombre';
-                popup.appendChild(title);
-
-                const info = document.createElement('div');
-                info.className = 'map-popup-meta';
-                info.textContent = 'Placa: ' + loc.licensePlate + ' · ' + loc.type + ' (' + loc.status + ')';
-                popup.appendChild(info);
-
-                const link = document.createElement('a');
-                link.className = 'map-popup-link';
-                link.href = '/repairs/' + encodeURIComponent(loc.repairId);
-                link.textContent = 'Ver orden #' + loc.repairId + ' →';
-                popup.appendChild(link);
-
-                L.marker([markerLat, markerLng]).addTo(map).bindPopup(popup);
-                bounds.push([markerLat, markerLng]);
-
-                if (group.length > 1) {
-                    L.polyline([[markerLat, markerLng], [lat, lng]], {
-                        color: '#64748b',
-                        weight: 1.5,
-                        dashArray: '4,4'
-                    }).addTo(map);
-                }
-            });
-        });
-
-        function fitAll() {
-            if (bounds.length === 1) {
-                map.setView(bounds[0], 15);
-            } else if (bounds.length > 1) {
-                map.fitBounds(bounds, { padding: [36, 36], maxZoom: 15 });
-            }
-        }
-
-        fitAll();
-
-        const fitBtn = document.getElementById('fitAllBtn');
-        if (fitBtn) {
-            fitBtn.addEventListener('click', fitAll);
-        }
-    })();
-</script>
 </body>
 </html>

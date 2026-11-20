@@ -1,30 +1,46 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head th:fragment="head(title)">
+<head th:fragment="head(pageTitle)">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title} + ' | Taller Automotriz'">Taller Automotriz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#050811">
+    <title th:text="${pageTitle != null ? pageTitle + ' | Veloxa Service' : 'Veloxa Service — Taller Automotriz'}">
+        Veloxa Service — Taller Automotriz
+    </title>
 
-    <!-- Prevención de FOUC (RF-30): aplica el tema guardado antes del primer render -->
+    <!-- Favicon Veloxa Service -->
+    <link rel="icon" type="image/png" th:href="@{/images/brand/logo-veloxa.png}">
+
+    <!-- Anti-FOUC: Aplica tema guardado (Oscuro por defecto) antes del render -->
     <script>
         (function () {
             try {
-                var saved = localStorage.getItem('taller-theme');
-                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                var theme = (saved === 'light' || saved === 'dark') ? saved : (prefersDark ? 'dark' : 'light');
+                var saved = localStorage.getItem('veloxa-theme') || localStorage.getItem('theme') || 'dark';
+                var theme = (saved === 'light') ? 'light' : 'dark';
                 document.documentElement.setAttribute('data-theme', theme);
+                var meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute('content', theme === 'light' ? '#f8fafc' : '#050811');
             } catch (e) {
-                document.documentElement.setAttribute('data-theme', 'light');
+                document.documentElement.setAttribute('data-theme', 'dark');
             }
         })();
     </script>
 
-    <!-- Tipografía profesional con fallback nativo si no hay internet -->
+    <!-- Tipografías: Plus Jakarta Sans (UI/Display) & JetBrains Mono (Telemetría/Placas/IDs) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- Leaflet 1.9.4 Nativo para Mapas de Reparaciones -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin="" defer></script>
+
+    <!-- Estilos Neo-Garage Precision & JS Global -->
     <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <script th:src="@{/js/ui.js}" defer></script>
 </head>
-<body></body>
 </html>

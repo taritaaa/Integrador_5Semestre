@@ -1,24 +1,77 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Detalle del usuario - Taller</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-</head>
+<head th:replace="~{fragments/head :: head('Detalle del usuario')}"></head>
 <body>
 <div th:replace="~{fragments/nav :: nav}"></div>
 
-<h1>Detalle del usuario</h1>
+<main class="page-shell">
+    <div class="page-header">
+        <div class="page-header-copy">
+            <div class="breadcrumb">
+                <a th:href="@{/}">Inicio</a>
+                <span>/</span>
+                <a th:href="@{/users}">Usuarios</a>
+                <span>/</span>
+                <span th:text="${user.name()}">Detalle</span>
+            </div>
+            <h1>Detalle del usuario</h1>
+            <p>Perfil, rol asignado y estado actual de acceso a la plataforma.</p>
+        </div>
 
-<p><strong>ID:</strong> <span th:text="${user.id()}"></span></p>
-<p><strong>Nombre:</strong> <span th:text="${user.name()}"></span></p>
-<p><strong>Documento:</strong> <span th:text="${user.document()}"></span></p>
-<p><strong>Correo:</strong> <span th:text="${user.email()}"></span></p>
-<p><strong>Teléfono:</strong> <span th:text="${user.phone()}"></span></p>
-<p><strong>Rol:</strong> <span th:text="${user.role()}"></span></p>
-<p><strong>Estado:</strong> <span th:text="${user.active()} ? 'Activa' : 'Desactivada'"></span></p>
+        <div class="page-actions">
+            <a class="btn btn-secondary" th:href="@{/users}">&larr; Volver al listado</a>
+            <a class="btn" th:href="@{/users/{id}/edit(id=${user.id()})}">Editar usuario</a>
+        </div>
+    </div>
 
-<a th:href="@{/users/{id}/edit(id=${user.id()})}">Editar</a>
-<a th:href="@{/users}">Volver al listado</a>
+    <section class="card">
+        <div class="card-header">
+            <div class="user-cell">
+                <span class="user-avatar user-avatar-lg"
+                      th:text="${#strings.substring(user.name(), 0, 1)}"
+                      aria-hidden="true">U</span>
+                <div>
+                    <h2 style="margin: 0;" th:text="${user.name()}"></h2>
+                    <span class="mono" style="font-size: 0.85rem; color: var(--text-muted);" th:text="${user.email()}"></span>
+                </div>
+            </div>
+
+            <div class="page-actions">
+                <span class="role-chip"
+                      th:classappend="${#strings.toString(user.role()) == 'ADMIN'} ? ' role-admin' : ' role-mechanic'"
+                      th:text="${user.role()}"></span>
+                <span class="badge badge-success" th:if="${user.active()}">Cuenta activa</span>
+                <span class="badge badge-neutral" th:unless="${user.active()}">Cuenta desactivada</span>
+            </div>
+        </div>
+
+        <dl class="detail-grid">
+            <div class="detail-item">
+                <dt>ID de registro</dt>
+                <dd class="mono" th:text="'#' + ${user.id()}"></dd>
+            </div>
+            <div class="detail-item">
+                <dt>Nombre completo</dt>
+                <dd th:text="${user.name()}"></dd>
+            </div>
+            <div class="detail-item">
+                <dt>Documento de identidad</dt>
+                <dd class="mono" th:text="${user.document()}"></dd>
+            </div>
+            <div class="detail-item">
+                <dt>Correo electrónico</dt>
+                <dd class="mono" th:text="${user.email()}"></dd>
+            </div>
+            <div class="detail-item">
+                <dt>Teléfono celular</dt>
+                <dd class="mono" th:text="${user.phone()}"></dd>
+            </div>
+            <div class="detail-item">
+                <dt>Estado</dt>
+                <dd th:text="${user.active()} ? 'Activa' : 'Desactivada'"></dd>
+            </div>
+        </dl>
+    </section>
+</main>
 </body>
 </html>

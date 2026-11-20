@@ -1,39 +1,86 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Buscar modelo por placa - Taller</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-</head>
+<head th:replace="~{fragments/head :: head('Buscar modelo por placa')}"></head>
 <body>
 <div th:replace="~{fragments/nav :: nav}"></div>
 
-<h1>Buscar modelo por placa</h1>
+<main class="page-shell">
+    <div class="form-card">
+        <div class="page-header">
+            <div class="page-header-copy">
+                <div class="breadcrumb">
+                    <a th:href="@{/}">Inicio</a>
+                    <span>/</span>
+                    <a th:href="@{/vehicles}">Vehículos</a>
+                    <span>/</span>
+                    <span>Consultar placa</span>
+                </div>
+                <h1>Buscar modelo por placa</h1>
+                <p>Identifica rápidamente el tipo de matrícula, la marca y la línea de un vehículo registrado.</p>
+            </div>
 
-<form method="get" th:action="@{/vehicles/model-by-plate}">
-    <label for="plate">Placa</label>
-    <input type="text" id="plate" name="plate" maxlength="7" required th:value="${plate}"
-           placeholder="ABC-123, ABC-12A, R-12345, S-12345, CD-1234">
-    <small>
-        Carro, camión o tractomula: ABC-123 |
-        Moto: ABC-12 o ABC-12A |
-        Remolque: R-12345 |
-        Semirremolque: S-12345 |
-        Diplomático: CC-1234 o CD-1234.
-        Se puede escribir con o sin guion.
-    </small>
-    <button type="submit">Buscar</button>
-</form>
+            <div class="page-actions">
+                <a class="btn btn-secondary" th:href="@{/vehicles}">&larr; Volver a vehículos</a>
+            </div>
+        </div>
 
-<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+        <section class="card">
+            <form method="get" th:action="@{/vehicles/model-by-plate}">
+                <label for="plate">Número de placa</label>
+                <div class="lookup-search" style="margin-top: 0.4rem;">
+                    <input type="text"
+                           id="plate"
+                           name="plate"
+                           maxlength="7"
+                           required
+                           autofocus
+                           th:value="${plate}"
+                           placeholder="Ej: ABC-123, ABC-12A, R-12345"
+                           oninput="this.value = this.value.toUpperCase()">
+                    <button type="submit" class="btn btn-accent">Buscar placa</button>
+                </div>
 
-<div th:if="${result}">
-    <p><strong>Placa:</strong> <span th:text="${result.licensePlate()}"></span></p>
-    <p><strong>Tipo de placa:</strong> <span th:text="${result.plateType()}"></span></p>
-    <p><strong>Modelo:</strong> <span th:text="${result.modelName()}"></span></p>
-    <p><strong>Marca:</strong> <span th:text="${result.brand()}"></span></p>
-</div>
+                <div class="format-chips" aria-label="Ejemplos de formatos válidos">
+                    <span class="format-chip">Carro / Camión: <strong>ABC-123</strong></span>
+                    <span class="format-chip">Moto: <strong>ABC-12 / ABC-12A</strong></span>
+                    <span class="format-chip">Remolque: <strong>R-12345</strong></span>
+                    <span class="format-chip">Semirremolque: <strong>S-12345</strong></span>
+                    <span class="format-chip">Diplomático: <strong>CC-1234 / CD-1234</strong></span>
+                </div>
+                <span class="form-hint" style="display:block; margin-top: 0.55rem;">
+                    Puede escribir la matrícula con o sin guion.
+                </span>
+            </form>
+        </section>
 
-<a th:href="@{/vehicles}">Volver a vehículos</a>
+        <p class="alert alert-error" style="margin-top: 1.25rem;" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+        <section class="card result-highlight" th:if="${result}">
+            <div class="card-header">
+                <h2>Resultado encontrado</h2>
+                <span class="colombia-plate colombia-plate-lg" th:text="${result.licensePlate()}"></span>
+            </div>
+
+            <dl class="detail-grid">
+                <div class="detail-item">
+                    <dt>Placa</dt>
+                    <dd class="mono" th:text="${result.licensePlate()}"></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Tipo de placa</dt>
+                    <dd><span class="badge badge-info" th:text="${result.plateType()}"></span></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Marca</dt>
+                    <dd th:text="${result.brand()}"></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Modelo</dt>
+                    <dd th:text="${result.modelName()}"></dd>
+                </div>
+            </dl>
+        </section>
+    </div>
+</main>
 </body>
 </html>

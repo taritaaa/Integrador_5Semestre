@@ -1,14 +1,6 @@
 #FileLock
-<<<<<<< HEAD
-#Tue Nov 17 14:43:22 COT 2026
-hostName=Juliana
-id=1a1eb08f4e86619389ad642bf8afce281fb60db7382
+#Thu Nov 19 21:00:06 COT 2026
+hostName=LAPTOP-4TICLTPR
+id=1a1f6aeaa65ceb52f2a81997ae9d1c050581040d390
 method=file
-server=192.168.56.1\:63097
-=======
-#Mon Nov 09 15:28:13 COT 2026
-hostName=DESKTOP-F4FOGJD
-id=1a1c1ff356d680bd235cd7a1a093aa1074632ec82a6
-method=file
-server=192.168.56.1\:59186
->>>>>>> 0e1a47ea2666b4d645ffd45136827702145e237d
+server=192.168.56.1\:62766
