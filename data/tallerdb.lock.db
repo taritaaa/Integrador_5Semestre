@@ -1,6 +1,6 @@
 #FileLock
-#Thu Nov 19 21:00:06 COT 2026
+#Thu Nov 19 21:06:24 COT 2026
 hostName=LAPTOP-4TICLTPR
-id=1a1f6aeaa65ceb52f2a81997ae9d1c050581040d390
+id=1a1f6b46c1626a139707b1eacf66d38dbada9241e05
 method=file
-server=192.168.56.1\:62766
+server=192.168.56.1\:53505
