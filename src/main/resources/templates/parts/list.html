@@ -58,7 +58,7 @@
                 <td data-label="Repuesto">
                     <div class="part-cell-identity">
                         <img th:if="${p.imageUrl() != null and !#strings.isEmpty(p.imageUrl())}"
-                             th:src="${#strings.startsWith(p.imageUrl(), '/') ? p.imageUrl() : '/uploads/parts/' + p.imageUrl()}"
+                             th:src="${#strings.startsWith(p.imageUrl(), '/') ? p.imageUrl() : '/part-images/' + p.imageUrl()}"
                              th:alt="${p.name()}"
                              class="part-thumb">
                         <span th:if="${p.imageUrl() == null or #strings.isEmpty(p.imageUrl())}"

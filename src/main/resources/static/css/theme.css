@@ -2940,3 +2940,60 @@ select[disabled] {
         height: 380px;
     }
 }
+
+/* ==========================================================================
+   FIX 1 — TOOLTIPS EN BARRA SUPERIOR (DESPLIEGUE HACIA ABAJO SIN CORTES)
+   ========================================================================== */
+.veloxa-navbar,
+.veloxa-nav-inner,
+.veloxa-nav-right,
+.auth-topbar,
+.auth-topbar-right {
+    overflow: visible;
+}
+
+/* Evita que el botón de tema o iconos suban demasiado contra el borde superior */
+.veloxa-navbar .theme-switch:hover,
+.veloxa-navbar .action-btn-view:hover,
+.veloxa-navbar .action-btn-delete:hover,
+.auth-topbar .theme-switch:hover {
+    transform: scale(1.06) translateY(0);
+}
+
+/* Posiciona el tooltip DEBAJO del botón cuando vive en la cabecera */
+.veloxa-navbar [data-tooltip]::before,
+.auth-topbar [data-tooltip]::before {
+    bottom: auto;
+    top: calc(100% + 10px);
+    left: auto;
+    right: 0;
+    transform: translateY(-6px);
+}
+
+.veloxa-navbar [data-tooltip]::after,
+.auth-topbar [data-tooltip]::after {
+    bottom: auto;
+    top: calc(100% + 5px);
+    left: 50%;
+    transform: translate(-50%, -6px);
+    border-width: 0 5px 5px 5px;
+    border-color: transparent transparent rgba(0, 168, 181, 0.72) transparent;
+}
+
+.veloxa-navbar .action-btn-delete[data-tooltip]::after {
+    border-color: transparent transparent rgba(244, 63, 94, 0.78) transparent;
+}
+
+.veloxa-navbar [data-tooltip]:hover::before,
+.veloxa-navbar [data-tooltip]:focus-visible::before,
+.auth-topbar [data-tooltip]:hover::before,
+.auth-topbar [data-tooltip]:focus-visible::before {
+    transform: translateY(0);
+}
+
+.veloxa-navbar [data-tooltip]:hover::after,
+.veloxa-navbar [data-tooltip]:focus-visible::after,
+.auth-topbar [data-tooltip]:hover::after,
+.auth-topbar [data-tooltip]:focus-visible::after {
+    transform: translate(-50%, 0);
+}

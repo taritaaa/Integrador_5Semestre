@@ -87,7 +87,7 @@
             <div class="form-section-title" style="margin-top: 0;">Fotografía de Referencia</div>
 
             <img th:if="${part.imageUrl() != null and !#strings.isEmpty(part.imageUrl())}"
-                 th:src="${#strings.startsWith(part.imageUrl(), '/') ? part.imageUrl() : '/uploads/parts/' + part.imageUrl()}"
+                 th:src="${#strings.startsWith(part.imageUrl(), '/') ? part.imageUrl() : '/part-images/' + part.imageUrl()}"
                  th:alt="${part.name()}"
                  class="part-hero-image">
 
