@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class AuthService {
+public class  AuthService {
 
     private static final String INVALID_LINK_MESSAGE = "El enlace no es válido o ya expiró. Solicite uno nuevo";
 
